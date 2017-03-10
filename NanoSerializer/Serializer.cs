@@ -8,10 +8,17 @@ using System.Threading;
 
 namespace NanoSerializer
 {
+    /// <summary>
+    /// NanoSerializer is super fast and compact binary data contract serializer
+    /// </summary>
     public static class Serializer
     {
         const int lengthSize = 2;
 
+        /// <summary>
+        /// Serializer builder chain
+        /// </summary>
+        /// <typeparam name="T">Serializable type</typeparam>
         public class Builder<T>
         {
             public int Index = 0;
@@ -21,7 +28,7 @@ namespace NanoSerializer
             public List<Action<T, List<byte[]>>> Setters = new List<Action<T, List<byte[]>>>();
         }
 
-        static Action<T, object> BuildSetAccessor<T>(MethodInfo method)
+        private static Action<T, object> BuildSetAccessor<T>(MethodInfo method)
         {
             var obj = Expression.Parameter(typeof(T), "o");
             var value = Expression.Parameter(typeof(object));
@@ -31,7 +38,7 @@ namespace NanoSerializer
             return expr.Compile();
         }
 
-        static Func<T, object> BuildGetAccessor<T>(MethodInfo method)
+        private static Func<T, object> BuildGetAccessor<T>(MethodInfo method)
         {
             var obj = Expression.Parameter(typeof(T), "o");
             var call = Expression.Call(Expression.Convert(obj, method.DeclaringType), method);
@@ -40,6 +47,9 @@ namespace NanoSerializer
             return expr.Compile();
         }
 
+        /// <summary>
+        /// Creates serializer
+        /// </summary>
         public static Builder<T> Build<T>()
         {
             var builder = new Builder<T>();
@@ -58,7 +68,7 @@ namespace NanoSerializer
             return builder;
         }
 
-        public static Action<T, byte[]> Getter<T>(Builder<T> source, Type type, Action<T, object> setter)
+        private static Action<T, byte[]> Getter<T>(Builder<T> source, Type type, Action<T, object> setter)
         {
             Action<T, byte[]> method = null;
             if (type == typeof(string))
@@ -158,7 +168,7 @@ namespace NanoSerializer
             return method;
         }
 
-        public static Action<T, List<byte[]>> Setter<T>(Type type, Func<T, object> getter)
+        private static Action<T, List<byte[]>> Setter<T>(Type type, Func<T, object> getter)
         {
             Action<T, List<byte[]>> method = null;
 
@@ -245,6 +255,13 @@ namespace NanoSerializer
             return method;
         }
 
+        /// <summary>
+        /// Serialize data contract to byte array
+        /// </summary>
+        /// <typeparam name="T">Serializable type</typeparam>
+        /// <param name="source">Serializer build model</param>
+        /// <param name="instance">Instance of serializable type</param>
+        /// <returns>Byte array</returns>
         public static byte[] Serialize<T>(this Builder<T> source, T instance)
         {
             var blocks = new List<byte[]>();
@@ -267,6 +284,13 @@ namespace NanoSerializer
             return buffer;
         }
 
+        /// <summary>
+        /// Deserialize type from byte array
+        /// </summary>
+        /// <typeparam name="T">Serialization type</typeparam>
+        /// <param name="source">Serializer build model</param>
+        /// <param name="data">Byte array</param>
+        /// <returns>New instance of deserialized contract</returns>
         public static T Deserialize<T>(this Builder<T> source, byte[] data) where T : new()
         {
             var item = new T();
