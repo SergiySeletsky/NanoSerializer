@@ -35,7 +35,7 @@ namespace NanoSerializer.Tests
             var sw = Stopwatch.StartNew();
             for (var i = 0; i < count; i++)
             {
-                var bytes = serializer.Serialize(instance);
+                var data = serializer.Serialize(instance);
             }
             sw.Stop();
 
@@ -52,7 +52,7 @@ namespace NanoSerializer.Tests
             var sw = Stopwatch.StartNew();
             for (var i = 0; i < count; i++)
             {
-                var cls = serializer.Deserialize(data);
+                var value = serializer.Deserialize(data);
             }
             sw.Stop();
 
