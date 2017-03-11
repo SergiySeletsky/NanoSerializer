@@ -278,7 +278,7 @@ namespace NanoSerializer
             foreach (var item in blocks)
             {
                 Buffer.BlockCopy(item, 0, buffer, offset, item.Length);
-                offset += item.Length;
+                Interlocked.Add(ref offset, item.Length);
             }
 
             return buffer;
