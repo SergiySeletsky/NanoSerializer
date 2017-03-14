@@ -17,4 +17,6 @@ var serializer = Serializer.Build<TestContract>();  //Create a nano serializer f
 var data = serializer.Serialize(instance);      //Serialize instance of type
 var instance = serializer.Deserialize(data);    //Deserialize data to new instance
 ```
-
+### Note: Solution can be opened and compiled only in VS2017
+### NuGet packege will be availible soon - so now you can just use Serializer.cs in your project for now
+### Support of all .NET types will be implemented in near future
