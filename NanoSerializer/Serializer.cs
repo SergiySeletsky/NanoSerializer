@@ -274,9 +274,9 @@ namespace NanoSerializer
         /// <param name="source">Serializer build model</param>
         /// <param name="instance">Instance of serializable type</param>
         /// <returns>Byte array</returns>
-        public byte[] Serialize<T>(T instance)
+        public byte[] Serialize(object instance)
         {
-            var source = runtime[typeof(T)];
+            var source = runtime[instance.GetType()];
 
             var blocks = new List<byte[]>();
 
@@ -307,15 +307,36 @@ namespace NanoSerializer
         /// <returns>New instance of deserialized contract</returns>
         public T Deserialize<T>(byte[] data) where T : new()
         {
-            var source = runtime[typeof(T)];
-
             var item = new T();
+
+            return (T)Deserialize(item, typeof(T), data);
+        }
+
+        /// <summary>
+        /// Deserialize type from byte array
+        /// </summary>
+        /// <typeparam name="T">Serialization type</typeparam>
+        /// <param name="source">Serializer build model</param>
+        /// <param name="data">Byte array</param>
+        /// <returns>New instance of deserialized contract</returns>
+        public object Deserialize(Type type, byte[] data)
+        {
+            var instance = Activator.CreateInstance(type);
+
+            return Deserialize(instance, type, data);
+        }
+
+        public object Deserialize(object instance, Type type, byte[] data)
+        {
+            var source = runtime[type];
+
             source.Index = 0;
             foreach (var getter in source.Getters)
             {
-                getter(item, data);
+                getter(instance, data);
             }
-            return item;
+
+            return instance;
         }
     }
 }
