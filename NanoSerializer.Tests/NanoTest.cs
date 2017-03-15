@@ -6,7 +6,7 @@ namespace NanoSerializer.Tests
     [TestClass]
     public class NanoTest : BaseTest
     {
-        private Serializer.Builder<TestContract> serializer;
+        private Serializer serializer;
 
         [TestInitialize]
         public void Initialize()
@@ -37,7 +37,7 @@ namespace NanoSerializer.Tests
             var sw = Stopwatch.StartNew();
             for (var i = 0; i < count; i++)
             {
-                var value = serializer.Deserialize(data);
+                var value = serializer.Deserialize<TestContract>(data);
             }
             sw.Stop();
 

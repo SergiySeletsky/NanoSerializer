@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Runtime.Serialization;
 using System.Reflection;
 using System.Text;
 using System.Threading;
@@ -11,9 +12,17 @@ namespace NanoSerializer
     /// <summary>
     /// NanoSerializer is super fast and compact binary data contract serializer
     /// </summary>
-    public static class Serializer
+    public sealed class Serializer
     {
+        private readonly Dictionary<Type, object> models = new Dictionary<Type, object>();
+
         const int lengthSize = 2;
+
+
+        private Serializer()
+        {
+
+        }
 
         /// <summary>
         /// Serializer builder chain
@@ -50,11 +59,13 @@ namespace NanoSerializer
         /// <summary>
         /// Creates serializer
         /// </summary>
-        public static Builder<T> Build<T>()
+        public static Serializer Build<T>()
         {
+            var instance = new Serializer();
+
             var builder = new Builder<T>();
 
-            var properties = typeof(T).GetRuntimeProperties();
+            var properties = typeof(T).GetRuntimeProperties().OrderBy(f => f.GetCustomAttribute<DataMemberAttribute>().Order);
 
             foreach (var property in properties)
             {
@@ -65,7 +76,31 @@ namespace NanoSerializer
                 builder.Setters.Add(Setter(property.PropertyType, getter));
             }
 
-            return builder;
+            instance.models.Add(typeof(T), builder);
+
+            return instance;
+        }
+
+        public static Serializer BuildAssembly<T>()
+        {
+            var instance = new Serializer();
+
+            var builder = new Builder<T>();
+
+            var properties = typeof(T).GetRuntimeProperties().OrderBy(f => f.GetCustomAttribute<DataMemberAttribute>().Order);
+
+            foreach (var property in properties)
+            {
+                var setter = BuildSetAccessor<T>(property.SetMethod);
+                builder.Getters.Add(Getter(builder, property.PropertyType, setter));
+
+                var getter = BuildGetAccessor<T>(property.GetMethod);
+                builder.Setters.Add(Setter(property.PropertyType, getter));
+            }
+
+            instance.models.Add(typeof(T), builder);
+
+            return instance;
         }
 
         private static Action<T, byte[]> Getter<T>(Builder<T> source, Type type, Action<T, object> setter)
@@ -262,8 +297,10 @@ namespace NanoSerializer
         /// <param name="source">Serializer build model</param>
         /// <param name="instance">Instance of serializable type</param>
         /// <returns>Byte array</returns>
-        public static byte[] Serialize<T>(this Builder<T> source, T instance)
+        public byte[] Serialize<T>(T instance)
         {
+            var source = (Builder<T>)models[typeof(T)];
+
             var blocks = new List<byte[]>();
 
             foreach (var setter in source.Setters)
@@ -291,8 +328,10 @@ namespace NanoSerializer
         /// <param name="source">Serializer build model</param>
         /// <param name="data">Byte array</param>
         /// <returns>New instance of deserialized contract</returns>
-        public static T Deserialize<T>(this Builder<T> source, byte[] data) where T : new()
+        public T Deserialize<T>(byte[] data) where T : new()
         {
+            var source = (Builder<T>)models[typeof(T)];
+
             var item = new T();
             source.Index = 0;
             foreach (var getter in source.Getters)
