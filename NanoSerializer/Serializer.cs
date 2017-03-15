@@ -302,7 +302,6 @@ namespace NanoSerializer
         /// Deserialize type from byte array
         /// </summary>
         /// <typeparam name="T">Serialization type</typeparam>
-        /// <param name="source">Serializer build model</param>
         /// <param name="data">Byte array</param>
         /// <returns>New instance of deserialized contract</returns>
         public T Deserialize<T>(byte[] data) where T : new()
@@ -315,8 +314,7 @@ namespace NanoSerializer
         /// <summary>
         /// Deserialize type from byte array
         /// </summary>
-        /// <typeparam name="T">Serialization type</typeparam>
-        /// <param name="source">Serializer build model</param>
+        /// <param name="type">Type of object</param>
         /// <param name="data">Byte array</param>
         /// <returns>New instance of deserialized contract</returns>
         public object Deserialize(Type type, byte[] data)
@@ -326,7 +324,7 @@ namespace NanoSerializer
             return Deserialize(instance, type, data);
         }
 
-        public object Deserialize(object instance, Type type, byte[] data)
+        private object Deserialize(object instance, Type type, byte[] data)
         {
             var source = runtime[type];
 
