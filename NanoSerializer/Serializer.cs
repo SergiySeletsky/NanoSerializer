@@ -14,98 +14,75 @@ namespace NanoSerializer
     /// </summary>
     public sealed class Serializer
     {
-        private readonly Dictionary<Type, object> models = new Dictionary<Type, object>();
+        private readonly Dictionary<Type, Mapper> runtime = new Dictionary<Type, Mapper>();
 
         const int lengthSize = 2;
 
-
-        private Serializer()
+        public Serializer(Type type)
         {
+            var types = type.GetTypeInfo().Assembly.DefinedTypes.Where(t => t.CustomAttributes.Any(a => a.AttributeType == typeof(DataContractAttribute)));
 
+            foreach (var typeInfo in types)
+            {
+                Register(typeInfo.AsType());
+            }
         }
 
         /// <summary>
-        /// Serializer builder chain
+        /// Serializer mapper chain
         /// </summary>
-        /// <typeparam name="T">Serializable type</typeparam>
-        public class Builder<T>
+        public class Mapper
         {
             public int Index = 0;
 
-            public List<Action<T, byte[]>> Getters = new List<Action<T, byte[]>>();
+            public List<Action<object, byte[]>> Getters = new List<Action<object, byte[]>>();
 
-            public List<Action<T, List<byte[]>>> Setters = new List<Action<T, List<byte[]>>>();
+            public List<Action<object, List<byte[]>>> Setters = new List<Action<object, List<byte[]>>>();
         }
 
-        private static Action<T, object> BuildSetAccessor<T>(MethodInfo method)
+        private static Action<object, object> BuildSetAccessor(MethodInfo method)
         {
-            var obj = Expression.Parameter(typeof(T), "o");
+            var obj = Expression.Parameter(typeof(object), "o");
             var value = Expression.Parameter(typeof(object));
             var convert = Expression.Convert(value, method.GetParameters()[0].ParameterType);
             var call = Expression.Call(Expression.Convert(obj, method.DeclaringType), method, convert);
-            var expr = Expression.Lambda<Action<T, object>>(call, obj, value);
+            var expr = Expression.Lambda<Action<object, object>>(call, obj, value);
             return expr.Compile();
         }
 
-        private static Func<T, object> BuildGetAccessor<T>(MethodInfo method)
+        private static Func<object, object> BuildGetAccessor(MethodInfo method)
         {
-            var obj = Expression.Parameter(typeof(T), "o");
+            var obj = Expression.Parameter(typeof(object), "o");
             var call = Expression.Call(Expression.Convert(obj, method.DeclaringType), method);
             var convert = Expression.Convert(call, typeof(object));
-            var expr = Expression.Lambda<Func<T, object>>(convert, obj);
+            var expr = Expression.Lambda<Func<object, object>>(convert, obj);
             return expr.Compile();
         }
 
         /// <summary>
-        /// Creates serializer
+        /// Builds serializer
         /// </summary>
-        public static Serializer Build<T>()
+        private void Register(Type type)
         {
-            var instance = new Serializer();
+            var builder = new Mapper();
 
-            var builder = new Builder<T>();
-
-            var properties = typeof(T).GetRuntimeProperties().OrderBy(f => f.GetCustomAttribute<DataMemberAttribute>().Order);
+            var properties = type.GetRuntimeProperties().OrderBy(f => f.GetCustomAttribute<DataMemberAttribute>().Order);
 
             foreach (var property in properties)
             {
-                var setter = BuildSetAccessor<T>(property.SetMethod);
+                var setter = BuildSetAccessor(property.SetMethod);
                 builder.Getters.Add(Getter(builder, property.PropertyType, setter));
 
-                var getter = BuildGetAccessor<T>(property.GetMethod);
+                var getter = BuildGetAccessor(property.GetMethod);
                 builder.Setters.Add(Setter(property.PropertyType, getter));
             }
 
-            instance.models.Add(typeof(T), builder);
-
-            return instance;
+            runtime.Add(type, builder);
         }
 
-        public static Serializer BuildAssembly<T>()
+        private static Action<object, byte[]> Getter(Mapper source, Type type, Action<object, object> setter)
         {
-            var instance = new Serializer();
-
-            var builder = new Builder<T>();
-
-            var properties = typeof(T).GetRuntimeProperties().OrderBy(f => f.GetCustomAttribute<DataMemberAttribute>().Order);
-
-            foreach (var property in properties)
-            {
-                var setter = BuildSetAccessor<T>(property.SetMethod);
-                builder.Getters.Add(Getter(builder, property.PropertyType, setter));
-
-                var getter = BuildGetAccessor<T>(property.GetMethod);
-                builder.Setters.Add(Setter(property.PropertyType, getter));
-            }
-
-            instance.models.Add(typeof(T), builder);
-
-            return instance;
-        }
-
-        private static Action<T, byte[]> Getter<T>(Builder<T> source, Type type, Action<T, object> setter)
-        {
-            Action<T, byte[]> method = null;
+            Action<object, byte[]> method = null;
             if (type == typeof(string))
             {
                 method = (item, buffer) =>
@@ -203,9 +180,9 @@ namespace NanoSerializer
             return method;
         }
 
-        private static Action<T, List<byte[]>> Setter<T>(Type type, Func<T, object> getter)
+        private static Action<object, List<byte[]>> Setter(Type type, Func<object, object> getter)
         {
-            Action<T, List<byte[]>> method = null;
+            Action<object, List<byte[]>> method = null;
 
             if (type == typeof(string))
             {
@@ -299,7 +276,7 @@ namespace NanoSerializer
         /// <returns>Byte array</returns>
         public byte[] Serialize<T>(T instance)
         {
-            var source = (Builder<T>)models[typeof(T)];
+            var source = runtime[typeof(T)];
 
             var blocks = new List<byte[]>();
 
@@ -330,7 +307,7 @@ namespace NanoSerializer
         /// <returns>New instance of deserialized contract</returns>
         public T Deserialize<T>(byte[] data) where T : new()
         {
-            var source = (Builder<T>)models[typeof(T)];
+            var source = runtime[typeof(T)];
 
             var item = new T();
             source.Index = 0;

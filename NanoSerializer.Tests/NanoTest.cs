@@ -11,7 +11,7 @@ namespace NanoSerializer.Tests
         [TestInitialize]
         public void Initialize()
         {
-            serializer = Serializer.Build<TestContract>();
+            serializer = new Serializer(typeof(TestContract));
         }
 
         [TestMethod]
