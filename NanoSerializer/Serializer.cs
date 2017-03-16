@@ -40,6 +40,11 @@ namespace NanoSerializer
             mappers.Add(mapper);
         }
 
+
+        /// <summary>
+        /// Builds instance of serializer for all data contracts in type assembly
+        /// </summary>
+        /// <param name="type">Any type from your data contracts assembly</param>
         public Serializer(Type type)
         {
             var types = type.GetTypeInfo().Assembly.DefinedTypes.Where(t => t.CustomAttributes.Any(a => a.AttributeType == typeof(DataContractAttribute)));
