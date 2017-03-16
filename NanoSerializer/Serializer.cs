@@ -55,18 +55,6 @@ namespace NanoSerializer
             }
         }
 
-        /// <summary>
-        /// Serializer mapper chain
-        /// </summary>
-        public class Mapper
-        {
-            public int Index = 0;
-
-            public List<Action<object, byte[]>> Getters = new List<Action<object, byte[]>>();
-
-            public List<Action<object, List<byte[]>>> Setters = new List<Action<object, List<byte[]>>>();
-        }
-
         private static Action<object, object> BuildSetAccessor(MethodInfo method)
         {
             var obj = Expression.Parameter(typeof(object), "o");
