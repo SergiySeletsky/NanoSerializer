@@ -93,41 +93,22 @@ namespace NanoSerializer
             foreach (var property in properties)
             {
                 var setter = BuildSetAccessor(property.SetMethod);
-                builder.Getters.Add(Getter(builder, property.PropertyType, setter));
-
                 var getter = BuildGetAccessor(property.GetMethod);
-                builder.Setters.Add(Setter(property.PropertyType, getter));
+                foreach (var mapper in mappers)
+                {
+                    if (mapper.Can(property.PropertyType))
+                    {
+                        var getMapper = mapper.Get(builder, setter);
+                        builder.Getters.Add(getMapper);
+
+                        var setMapper = mapper.Set(getter);
+                        builder.Setters.Add(setMapper);
+                        break;
+                    }
+                }
             }
 
             runtime.Add(type, builder);
-        }
-
-        private static Action<object, byte[]> Getter(Mapper source, Type type, Action<object, object> setter)
-        {
-            Action<object, byte[]> method = null;
-            foreach(var mapper in mappers)
-            {
-                if(mapper.Can(type))
-                {
-                    method = mapper.Get(source, setter);
-                    break;
-                }
-            }
-            return method;
-        }
-
-        private static Action<object, List<byte[]>> Setter(Type type, Func<object, object> getter)
-        {
-            Action<object, List<byte[]>> method = null;
-            foreach (var mapper in mappers)
-            {
-                if (mapper.Can(type))
-                {
-                    method = mapper.Set(getter);
-                    break;
-                }
-            }
-            return method;
         }
 
         /// <summary>
