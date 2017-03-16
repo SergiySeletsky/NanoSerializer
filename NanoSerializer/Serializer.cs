@@ -4,7 +4,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.Serialization;
 using System.Reflection;
-using System.Text;
 using System.Threading;
 
 namespace NanoSerializer
@@ -15,8 +14,31 @@ namespace NanoSerializer
     public sealed class Serializer
     {
         private readonly Dictionary<Type, Mapper> runtime = new Dictionary<Type, Mapper>();
+        private static readonly List<TypeMapper> mappers = new List<TypeMapper>();
 
-        const int lengthSize = 2;
+        static Serializer()
+        {
+            var typeMapper = typeof(TypeMapper);
+            var mapperTypes = typeMapper.GetTypeInfo().Assembly.DefinedTypes.Where(f => f.BaseType == typeMapper);
+            foreach(var mapperType in mapperTypes)
+            {
+                var mapper = (TypeMapper)Activator.CreateInstance(mapperType.AsType());
+                mappers.Add(mapper);
+            }
+        }
+
+        /// <summary>
+        /// Register your custom type mapper
+        /// </summary>
+        /// <param name="mapper">Instance of your type mapper</param>
+        public static void RegisterTypeMapper(TypeMapper mapper)
+        {
+            if(mapper is null)
+            {
+                throw new ArgumentNullException(nameof(mapper));
+            }
+            mappers.Add(mapper);
+        }
 
         public Serializer(Type type)
         {
@@ -83,187 +105,28 @@ namespace NanoSerializer
         private static Action<object, byte[]> Getter(Mapper source, Type type, Action<object, object> setter)
         {
             Action<object, byte[]> method = null;
-            if (type == typeof(string))
+            foreach(var mapper in mappers)
             {
-                method = (item, buffer) =>
+                if(mapper.Can(type))
                 {
-                    var length = BitConverter.ToInt16(buffer, source.Index);
-                    Interlocked.Add(ref source.Index, lengthSize);
-
-                    var data = new byte[length];
-
-                    Buffer.BlockCopy(buffer, source.Index, data, 0, length);
-
-                    Interlocked.Add(ref source.Index, length);
-
-                    var text = Encoding.UTF8.GetString(data);
-
-                    setter(item, text);
-                };
+                    method = mapper.Get(source, setter);
+                    break;
+                }
             }
-            else if (type == typeof(byte[]))
-            {
-                method = (item, buffer) => {
-                    var length = BitConverter.ToInt16(buffer, source.Index);
-
-                    Interlocked.Add(ref source.Index, lengthSize);
-
-                    var data = new byte[length];
-
-                    Buffer.BlockCopy(buffer, source.Index, data, 0, length);
-
-                    Interlocked.Add(ref source.Index, length);
-
-                    setter(item, data);
-                };
-            }
-            else if (type == typeof(int))
-            {
-                method = (item, buffer) => {
-                    var number = BitConverter.ToInt32(buffer, source.Index);
-                    Interlocked.Add(ref source.Index, sizeof(int));
-                    setter(item, number);
-                };
-            }
-            else if (type == typeof(long))
-            {
-                method = (item, buffer) => {
-                    var number = BitConverter.ToInt64(buffer, source.Index);
-                    Interlocked.Add(ref source.Index, sizeof(long));
-                    setter(item, number);
-                };
-            }
-            else if (type == typeof(bool))
-            {
-                method = (item, buffer) => {
-                    var boolean = BitConverter.ToBoolean(buffer, source.Index);
-                    Interlocked.Add(ref source.Index, sizeof(bool));
-                    setter(item, boolean);
-                };
-            }
-            else if (type == typeof(DateTime))
-            {
-                method = (item, buffer) => {
-                    var ticks = BitConverter.ToInt64(buffer, source.Index);
-                    Interlocked.Add(ref source.Index, sizeof(long));
-                    setter(item, new DateTime(ticks));
-                };
-            }
-            else if (type == typeof(List<string>))
-            {
-                method = (item, buffer) => {
-                    var length = BitConverter.ToInt16(buffer, source.Index);
-
-                    Interlocked.Add(ref source.Index, lengthSize);
-
-                    var data = new byte[length];
-
-                    Buffer.BlockCopy(buffer, source.Index, data, 0, length);
-
-                    Interlocked.Add(ref source.Index, length);
-
-                    var list = Encoding.UTF8.GetString(data).Split('|').ToList();
-
-                    setter(item, list);
-                };
-
-            }
-            else if (type.GetTypeInfo().BaseType == typeof(Enum))
-            {
-                method = (item, buffer) => {
-                    var value = Buffer.GetByte(buffer, source.Index);
-                    Interlocked.Add(ref source.Index, sizeof(byte));
-                    setter(item, value);
-                };
-            }
-
             return method;
         }
 
         private static Action<object, List<byte[]>> Setter(Type type, Func<object, object> getter)
         {
             Action<object, List<byte[]>> method = null;
-
-            if (type == typeof(string))
+            foreach (var mapper in mappers)
             {
-                method = (src, blocks) => {
-                    var item = getter(src);
-                    var text = (string)item;
-                    var bytes = Encoding.UTF8.GetBytes(text);
-                    var length = BitConverter.GetBytes((ushort)bytes.Length);
-
-                    blocks.Add(length);
-                    blocks.Add(bytes);
-                };
+                if (mapper.Can(type))
+                {
+                    method = mapper.Set(getter);
+                    break;
+                }
             }
-            else if (type == typeof(byte[]))
-            {
-                method = (src, blocks) => {
-                    var item = getter(src);
-                    var bytes = (byte[])item;
-                    var length = BitConverter.GetBytes((ushort)bytes.Length);
-
-                    blocks.Add(length);
-                    blocks.Add(bytes);
-                };
-            }
-            else if (type == typeof(int))
-            {
-                method = (src, blocks) => {
-                    var item = getter(src);
-                    var bytes = BitConverter.GetBytes((int)item);
-                    blocks.Add(bytes);
-                };
-            }
-            else if (type == typeof(long))
-            {
-                method = (src, blocks) => {
-                    var item = getter(src);
-                    var bytes = BitConverter.GetBytes((long)item);
-                    blocks.Add(bytes);
-                };
-            }
-            else if (type == typeof(bool))
-            {
-                method = (src, blocks) => {
-                    var item = getter(src);
-                    var bytes = BitConverter.GetBytes((bool)item);
-                    blocks.Add(bytes);
-                };
-            }
-            else if (type == typeof(DateTime))
-            {
-                method = (src, blocks) => {
-                    var item = getter(src);
-                    var dateTime = (DateTime)item;
-                    var bytes = BitConverter.GetBytes(dateTime.Ticks);
-                    blocks.Add(bytes);
-                };
-            }
-            else if (type == typeof(List<string>))
-            {
-                method = (src, blocks) => {
-                    var item = getter(src);
-
-                    var list = (List<string>)item;
-
-                    var text = list.Aggregate((i, j) => i + "|" + j);
-
-                    var bytes = Encoding.UTF8.GetBytes(text);
-                    var length = BitConverter.GetBytes((ushort)bytes.Length);
-
-                    blocks.Add(length);
-                    blocks.Add(bytes);
-                };
-            }
-            else if (type.GetTypeInfo().BaseType == typeof(Enum))
-            {
-                method = (src, blocks) => {
-                    var item = getter(src);
-                    blocks.Add(new byte[1] { (byte)item });
-                };
-            }
-
             return method;
         }
 
