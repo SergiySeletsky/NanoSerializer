@@ -5,6 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.Collections;
 
 namespace NanoSerializer.Example
 {
@@ -40,6 +43,7 @@ namespace NanoSerializer.Example
                 var data = serializer.Serialize(instance);
                 //var value = serializer.Deserialize<TestContract>(data);
             }
+
             Console.WriteLine("Hello World!");
             Console.ReadKey();
         }

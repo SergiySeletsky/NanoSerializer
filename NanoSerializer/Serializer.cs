@@ -132,14 +132,19 @@ namespace NanoSerializer
                 setter(instance, blocks);
             }
 
-            var length = blocks.Select(f => f.Length).Sum();
+            var length = 0;
+            foreach (var block in blocks)
+            {
+                length += block.Length;
+            }
+
             var buffer = new byte[length];
 
             var offset = 0;
-            foreach (var item in blocks)
+            foreach (var block in blocks)
             {
-                Buffer.BlockCopy(item, 0, buffer, offset, item.Length);
-                Interlocked.Add(ref offset, item.Length);
+                Buffer.BlockCopy(block, 0, buffer, offset, block.Length);
+                offset += block.Length;
             }
 
             return buffer;
