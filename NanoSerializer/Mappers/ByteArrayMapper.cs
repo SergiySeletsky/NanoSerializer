@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
-using static NanoSerializer.Serializer;
 
 namespace NanoSerializer.Mappers
 {
@@ -17,13 +16,13 @@ namespace NanoSerializer.Mappers
             return (item, buffer) => {
                 var length = BitConverter.ToInt16(buffer, source.Index);
 
-                Interlocked.Add(ref source.Index, lengthSize);
+                source.Index += lengthSize;
 
                 var data = new byte[length];
 
                 Buffer.BlockCopy(buffer, source.Index, data, 0, length);
 
-                Interlocked.Add(ref source.Index, length);
+                source.Index += length;
 
                 setter(item, data);
             };

@@ -1,12 +1,16 @@
-﻿using System;
+﻿using NanoSerializer.Tests;
+using NanoSerializer;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace NanoSerializer.Tests
+namespace NanoSerializer.Example
 {
-    public abstract class BaseTest
+    class Program
     {
-        protected const int count = 100000;
-        protected TestContract instance = new TestContract()
+        static TestContract instance = new TestContract()
         {
             Text = "NanoSerializer is super fast and compact binary data contract serializer",
             Count = 35346457567,
@@ -26,5 +30,18 @@ namespace NanoSerializer.Tests
                 Active = true
             }
         };
+
+        static void Main(string[] args)
+        {
+            var serializer = new Serializer(typeof(TestContract));
+
+            for (var i = 0; i < 1000000; i++)
+            {
+                var data = serializer.Serialize(instance);
+                //var value = serializer.Deserialize<TestContract>(data);
+            }
+            Console.WriteLine("Hello World!");
+            Console.ReadKey();
+        }
     }
 }

@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Runtime.Serialization;
 using System.Reflection;
 using System.Threading;
+using NanoSerializer.Mappers;
 
 namespace NanoSerializer
 {
@@ -89,6 +90,10 @@ namespace NanoSerializer
                 var getter = BuildGetAccessor(property.GetMethod);
                 foreach (var mapper in mappers)
                 {
+                    if(mapper is ComplexMapper)
+                    {
+                        (mapper as ComplexMapper).Use(this);
+                    }
                     if (mapper.Can(property.PropertyType))
                     {
                         var getMapper = mapper.Get(builder, setter);
@@ -113,6 +118,11 @@ namespace NanoSerializer
         /// <returns>Byte array</returns>
         public byte[] Serialize(object instance)
         {
+            if(instance is null)
+            {
+                return new byte[0];
+            }
+
             var source = runtime[instance.GetType()];
 
             var blocks = new List<byte[]>();

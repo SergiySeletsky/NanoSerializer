@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
-using static NanoSerializer.Serializer;
 
 namespace NanoSerializer.Mappers
 {
@@ -17,7 +16,7 @@ namespace NanoSerializer.Mappers
         {
             return (item, buffer) => {
                 var value = Buffer.GetByte(buffer, source.Index);
-                Interlocked.Add(ref source.Index, sizeof(byte));
+                source.Index += sizeof(byte);
                 setter(item, value);
             };
         }

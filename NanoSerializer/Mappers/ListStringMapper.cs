@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using static NanoSerializer.Serializer;
 
 namespace NanoSerializer.Mappers
 {
@@ -19,13 +18,13 @@ namespace NanoSerializer.Mappers
             return (item, buffer) => {
                 var length = BitConverter.ToInt16(buffer, source.Index);
 
-                Interlocked.Add(ref source.Index, lengthSize);
+                source.Index += lengthSize;
 
                 var data = new byte[length];
 
                 Buffer.BlockCopy(buffer, source.Index, data, 0, length);
 
-                Interlocked.Add(ref source.Index, length);
+                source.Index += length;
 
                 var list = Encoding.UTF8.GetString(data).Split('|').ToList();
 
@@ -40,9 +39,12 @@ namespace NanoSerializer.Mappers
 
                 var list = (List<string>)item;
 
-                var text = list.Aggregate((i, j) => i + "|" + j);
-
-                var bytes = Encoding.UTF8.GetBytes(text);
+                byte[] bytes = new byte[0];
+                if (list.Any())
+                {
+                    var text = list.Aggregate((i, j) => i + "|" + j);
+                    bytes = Encoding.UTF8.GetBytes(text);
+                }
                 var length = BitConverter.GetBytes((ushort)bytes.Length);
 
                 blocks.Add(length);

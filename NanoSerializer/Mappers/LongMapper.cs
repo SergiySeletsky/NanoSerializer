@@ -16,7 +16,7 @@ namespace NanoSerializer.Mappers
         {
             return (item, buffer) => {
                 var number = BitConverter.ToInt64(buffer, source.Index);
-                Interlocked.Add(ref source.Index, sizeof(long));
+                source.Index += sizeof(long);
                 setter(item, number);
             };
         }

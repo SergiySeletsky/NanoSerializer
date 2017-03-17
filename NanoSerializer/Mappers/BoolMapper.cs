@@ -16,7 +16,7 @@ namespace NanoSerializer.Mappers
         {
             return (item, buffer) => {
                 var boolean = BitConverter.ToBoolean(buffer, source.Index);
-                Interlocked.Add(ref source.Index, sizeof(bool));
+                source.Index += sizeof(bool);
                 setter(item, boolean);
             };
         }
