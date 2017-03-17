@@ -15,6 +15,6 @@ namespace NanoSerializer
 
         internal List<Action<object, byte[]>> Getters = new List<Action<object, byte[]>>();
 
-        internal List<Action<object, List<byte[]>>> Setters = new List<Action<object, List<byte[]>>>();
+        internal List<Func<object, List<byte[]>, int>> Setters = new List<Func<object, List<byte[]>, int>>();
     }
 }

@@ -127,15 +127,10 @@ namespace NanoSerializer
 
             var blocks = new List<byte[]>();
 
+            var length = 0;
             foreach (var setter in source.Setters)
             {
-                setter(instance, blocks);
-            }
-
-            var length = 0;
-            foreach (var block in blocks)
-            {
-                length += block.Length;
+                length += setter(instance, blocks);
             }
 
             var buffer = new byte[length];

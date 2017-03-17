@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Threading;
 
 namespace NanoSerializer.Mappers
 {
@@ -21,11 +20,12 @@ namespace NanoSerializer.Mappers
             };
         }
 
-        public override Action<object, List<byte[]>> Set(Func<object, object> getter)
+        public override Func<object, List<byte[]>, int> Set(Func<object, object> getter)
         {
             return (src, blocks) => {
                 var item = getter(src);
                 blocks.Add(new byte[1] { (byte)item });
+                return sizeof(byte);
             };
         }
     }

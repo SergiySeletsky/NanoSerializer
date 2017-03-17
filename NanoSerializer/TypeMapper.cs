@@ -12,6 +12,6 @@ namespace NanoSerializer
 
         public abstract Action<object, byte[]> Get(Mapper source, Action<object, object> setter);
 
-        public abstract Action<object, List<byte[]>> Set(Func<object, object> getter);
+        public abstract Func<object, List<byte[]>, int> Set(Func<object, object> getter);
     }
 }
