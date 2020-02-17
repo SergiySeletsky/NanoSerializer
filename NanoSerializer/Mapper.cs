@@ -10,8 +10,8 @@ namespace NanoSerializer
     /// </summary>
     public class Mapper
     {
-        internal List<Action<object, MemoryStream>> Getters = new List<Action<object, MemoryStream>>();
+        internal List<Action<object, Stream>> Getters = new List<Action<object, Stream>>();
 
-        internal List<Action<object, MemoryStream>> Setters = new List<Action<object, MemoryStream>>();
+        internal List<Action<object, Stream>> Setters = new List<Action<object, Stream>>();
     }
 }

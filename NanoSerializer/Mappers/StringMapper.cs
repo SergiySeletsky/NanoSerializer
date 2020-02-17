@@ -12,7 +12,7 @@ namespace NanoSerializer.Mappers
             return type == typeof(string);
         }
 
-        public override Action<object, MemoryStream> Get(Mapper source, Action<object, object> setter)
+        public override Action<object, Stream> Get(Mapper source, Action<object, object> setter)
         {
             return (item, stream) =>
             {
@@ -30,7 +30,7 @@ namespace NanoSerializer.Mappers
             };
         }
 
-        public override Action<object, MemoryStream> Set(Func<object, object> getter)
+        public override Action<object, Stream> Set(Func<object, object> getter)
         {
             return (src, stream) => {
                 var item = getter(src);

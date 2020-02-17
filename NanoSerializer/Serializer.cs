@@ -167,7 +167,7 @@ namespace NanoSerializer
             }
         }
 
-        private object Deserialize(object instance, Type type, MemoryStream data)
+        private object Deserialize(object instance, Type type, Stream data)
         {
             var source = runtime[type];
 
