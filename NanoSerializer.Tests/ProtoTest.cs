@@ -1,21 +1,19 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using ProtoBuf.Meta;
 using System.IO;
+using Xunit;
 
 namespace NanoSerializer.Tests
 {
-    [TestClass]
     public class ProtoTest : BaseTest
     {
-        [TestInitialize]
-        public void Initialize()
+        public ProtoTest()
         {
             RuntimeTypeModel.Default.Add(typeof(TestContract), true);
             RuntimeTypeModel.Default.CompileInPlace();
         }
 
-        [TestMethod]
+        [Fact]
         public void TestProtoSerialize()
         {
             var sw = Stopwatch.StartNew();
@@ -32,7 +30,7 @@ namespace NanoSerializer.Tests
             Trace.WriteLine($"PROTO Serialize: {sw.ElapsedMilliseconds} ms.");
         }
 
-        [TestMethod]
+        [Fact]
         public void TestProtoDeserialize()
         {
             byte[] data;

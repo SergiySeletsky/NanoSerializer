@@ -1,20 +1,18 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Diagnostics;
+using Xunit;
 
 namespace NanoSerializer.Tests
 {
-    [TestClass]
     public class NanoTest : BaseTest
     {
         private Serializer serializer;
 
-        [TestInitialize]
-        public void Initialize()
+        public NanoTest()
         {
             serializer = new Serializer(typeof(TestContract));
         }
 
-        [TestMethod]
+        [Fact]
         public void TestNanoSerialize()
         {
             var sw = Stopwatch.StartNew();
@@ -27,7 +25,7 @@ namespace NanoSerializer.Tests
             Trace.WriteLine($"NANO Serialize: {sw.ElapsedMilliseconds} ms.");
         }
 
-        [TestMethod]
+        [Fact]
         public void TestNanoDeserialize()
         {
             byte[] data = serializer.Serialize(instance);

@@ -34,7 +34,7 @@ namespace NanoSerializer.Example
             for (var i = 0; i < 1000000; i++)
             {
                 var data = serializer.Serialize(instance);
-                //var value = serializer.Deserialize<TestContract>(data);
+                var value = serializer.Deserialize<TestContract>(data);
             }
 
             Console.WriteLine("Hello World!");

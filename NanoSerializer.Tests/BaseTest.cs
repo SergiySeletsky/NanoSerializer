@@ -5,7 +5,7 @@ namespace NanoSerializer.Tests
 {
     public abstract class BaseTest
     {
-        protected const int count = 100000;
+        protected const int count = 1000000;
         protected TestContract instance = new TestContract()
         {
             Text = "NanoSerializer is super fast and compact binary data contract serializer",

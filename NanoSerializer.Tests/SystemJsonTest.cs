@@ -1,10 +1,10 @@
-﻿using Newtonsoft.Json;
-using System.Diagnostics;
+﻿using System.Diagnostics;
+using System.Text.Json;
 using Xunit;
 
 namespace NanoSerializer.Tests
 {
-    public class JsonTest : BaseTest
+    public class SystemJsonTest : BaseTest
     {
         [Fact]
         public void TestJsonSerialize()
@@ -12,7 +12,7 @@ namespace NanoSerializer.Tests
             var sw = Stopwatch.StartNew();
             for (var i = 0; i < count; i++)
             {
-                var json = JsonConvert.SerializeObject(instance);
+                var json = JsonSerializer.Serialize(instance);
             }
             sw.Stop();
 
@@ -22,14 +22,14 @@ namespace NanoSerializer.Tests
         [Fact]
         public void TestJsonDeserialize()
         {
-            var json = JsonConvert.SerializeObject(instance);
+            var json = JsonSerializer.Serialize(instance);
 
             Trace.WriteLine($"JSON Size: {json.Length} bytes.");
 
             var sw = Stopwatch.StartNew();
             for (var i = 0; i < count; i++)
             {
-                var value = JsonConvert.DeserializeObject<TestContract>(json);
+                var value = JsonSerializer.Deserialize<TestContract>(json);
             }
             sw.Stop();
 

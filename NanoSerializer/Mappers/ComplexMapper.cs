@@ -17,8 +17,7 @@ namespace NanoSerializer.Mappers
         public override bool Can(Type type)
         {
             this.type = type;
-            var typeInfo = type.GetTypeInfo();
-            return !typeInfo.IsPrimitive && typeInfo.IsClass && !type.Namespace.StartsWith("System");
+            return !type.IsPrimitive && type.IsClass && !type.Namespace.StartsWith("System");
         }
 
         public override Action<object, byte[]> Get(Mapper source, Action<object, object> setter)

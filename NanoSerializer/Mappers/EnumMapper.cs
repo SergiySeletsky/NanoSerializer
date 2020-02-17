@@ -8,7 +8,7 @@ namespace NanoSerializer.Mappers
     {
         public override bool Can(Type type)
         {
-            return type.GetTypeInfo().BaseType == typeof(Enum);
+            return type.BaseType == typeof(Enum);
         }
 
         public override Action<object, byte[]> Get(Mapper source, Action<object, object> setter)

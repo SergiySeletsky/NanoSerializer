@@ -19,8 +19,8 @@ namespace NanoSerializer
         static Serializer()
         {
             var typeMapper = typeof(TypeMapper);
-            var mapperTypes = typeMapper.GetTypeInfo().Assembly.DefinedTypes.Where(f => f.BaseType == typeMapper);
-            foreach(var mapperType in mapperTypes)
+            var mapperTypes = typeMapper.GetType().Assembly.DefinedTypes.Where(f => f.BaseType == typeMapper);
+            foreach (var mapperType in mapperTypes)
             {
                 var mapper = (TypeMapper)Activator.CreateInstance(mapperType.AsType());
                 mappers.Add(mapper);
@@ -33,7 +33,7 @@ namespace NanoSerializer
         /// <param name="mapper">Instance of your type mapper</param>
         public static void RegisterTypeMapper(TypeMapper mapper)
         {
-            if(mapper is null)
+            if (mapper is null)
             {
                 throw new ArgumentNullException(nameof(mapper));
             }
@@ -47,11 +47,11 @@ namespace NanoSerializer
         /// <param name="type">Any type from your data contracts assembly</param>
         public Serializer(Type type)
         {
-            var types = type.GetTypeInfo().Assembly.DefinedTypes.Where(t => t.CustomAttributes.Any(a => a.AttributeType == typeof(DataContractAttribute)));
+            var types = type.Assembly.DefinedTypes.Where(t => t.CustomAttributes.Any(a => a.AttributeType == typeof(DataContractAttribute)));
 
-            foreach (var typeInfo in types)
+            foreach (var typeItem in types)
             {
-                Register(typeInfo.AsType());
+                Register(typeItem);
             }
         }
 
@@ -89,7 +89,7 @@ namespace NanoSerializer
                 var getter = BuildGetAccessor(property.GetMethod);
                 foreach (var mapper in mappers)
                 {
-                    if(mapper is ComplexMapper)
+                    if (mapper is ComplexMapper)
                     {
                         (mapper as ComplexMapper).Use(this);
                     }
@@ -117,7 +117,7 @@ namespace NanoSerializer
         /// <returns>Byte array</returns>
         public byte[] Serialize(object instance)
         {
-            if(instance is null)
+            if (instance is null)
             {
                 return new byte[0];
             }
