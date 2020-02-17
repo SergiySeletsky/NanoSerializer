@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace NanoSerializer
@@ -12,6 +13,6 @@ namespace NanoSerializer
 
         public abstract Action<object, byte[]> Get(Mapper source, Action<object, object> setter);
 
-        public abstract Func<object, List<byte[]>, int> Set(Func<object, object> getter);
+        public abstract Action<object, MemoryStream> Set(Func<object, object> getter);
     }
 }

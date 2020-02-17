@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Runtime.Serialization;
 using System.Reflection;
 using NanoSerializer.Mappers;
+using System.IO;
 
 namespace NanoSerializer
 {
@@ -19,7 +20,7 @@ namespace NanoSerializer
         static Serializer()
         {
             var typeMapper = typeof(TypeMapper);
-            var mapperTypes = typeMapper.GetType().Assembly.DefinedTypes.Where(f => f.BaseType == typeMapper);
+            var mapperTypes = typeMapper.GetTypeInfo().Assembly.DefinedTypes.Where(f => f.BaseType == typeMapper);
             foreach (var mapperType in mapperTypes)
             {
                 var mapper = (TypeMapper)Activator.CreateInstance(mapperType.AsType());
@@ -124,24 +125,14 @@ namespace NanoSerializer
 
             var source = runtime[instance.GetType()];
 
-            var blocks = new List<byte[]>();
+            var stream = new MemoryStream();
 
-            var length = 0;
             foreach (var setter in source.Setters)
             {
-                length += setter(instance, blocks);
+                setter(instance, stream);
             }
 
-            var buffer = new byte[length];
-
-            var offset = 0;
-            foreach (var block in blocks)
-            {
-                Buffer.BlockCopy(block, 0, buffer, offset, block.Length);
-                offset += block.Length;
-            }
-
-            return buffer;
+            return stream.ToArray();
         }
 
         /// <summary>

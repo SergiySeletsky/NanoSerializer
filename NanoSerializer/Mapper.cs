@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace NanoSerializer
@@ -16,6 +17,6 @@ namespace NanoSerializer
 
         internal List<Action<object, byte[]>> Getters = new List<Action<object, byte[]>>();
 
-        internal List<Func<object, List<byte[]>, int>> Setters = new List<Func<object, List<byte[]>, int>>();
+        internal List<Action<object, MemoryStream>> Setters = new List<Action<object, MemoryStream>>();
     }
 }

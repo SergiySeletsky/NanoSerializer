@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace NanoSerializer.Mappers
 {
@@ -19,13 +20,12 @@ namespace NanoSerializer.Mappers
             };
         }
 
-        public override Func<object, List<byte[]>, int> Set(Func<object, object> getter)
+        public override Action<object, MemoryStream> Set(Func<object, object> getter)
         {
-            return (src, blocks) => {
+            return (src, stream) => {
                 var item = getter(src);
                 var bytes = BitConverter.GetBytes((int)item);
-                blocks.Add(bytes);
-                return sizeof(int);
+                stream.Write(bytes, 0, bytes.Length);
             };
         }
     }

@@ -13,6 +13,23 @@ namespace NanoSerializer.Tests
         }
 
         [Fact]
+        public void TestNanoFeatures()
+        {
+            byte[] data = serializer.Serialize(instance);
+            var value = serializer.Deserialize<TestContract>(data);
+
+            Assert.Equal(instance.Active, value.Active);
+            Assert.Equal(instance.Bytes, value.Bytes);
+            Assert.Equal(instance.Contract.Text, value.Contract.Text);
+            Assert.Equal(instance.Count, value.Count);
+            Assert.Equal(instance.Date, value.Date);
+            Assert.Equal(instance.Number, value.Number);
+            Assert.Equal(instance.Strings, value.Strings);
+            Assert.Equal(instance.TestEnum, value.TestEnum);
+            Assert.Equal(instance.Text, value.Text);
+        }
+
+        [Fact]
         public void TestNanoSerialize()
         {
             var sw = Stopwatch.StartNew();
