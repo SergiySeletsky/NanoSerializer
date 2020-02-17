@@ -13,18 +13,16 @@ namespace NanoSerializer.Mappers
             return type == typeof(List<string>);
         }
 
-        public override Action<object, byte[]> Get(Mapper source, Action<object, object> setter)
+        public override Action<object, MemoryStream> Get(Mapper source, Action<object, object> setter)
         {
-            return (item, buffer) => {
-                var length = BitConverter.ToInt16(buffer, source.Index);
-
-                source.Index += lengthSize;
+            return (item, stream) => {
+                var buffer = new byte[lengthSize];
+                stream.Read(buffer, 0, lengthSize);
+                var length = BitConverter.ToInt16(buffer, 0);
 
                 var data = new byte[length];
 
-                Buffer.BlockCopy(buffer, source.Index, data, 0, length);
-
-                source.Index += length;
+                stream.Read(data, 0, length);
 
                 var list = Encoding.UTF8.GetString(data).Split('|').ToList();
 

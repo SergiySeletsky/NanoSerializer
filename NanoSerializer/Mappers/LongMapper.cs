@@ -11,11 +11,13 @@ namespace NanoSerializer.Mappers
             return type == typeof(long);
         }
 
-        public override Action<object, byte[]> Get(Mapper source, Action<object, object> setter)
+        public override Action<object, MemoryStream> Get(Mapper source, Action<object, object> setter)
         {
-            return (item, buffer) => {
-                var number = BitConverter.ToInt64(buffer, source.Index);
-                source.Index += sizeof(long);
+            return (item, stream) => {
+                var buffer = new byte[sizeof(long)];
+                stream.Read(buffer, 0, sizeof(long));
+                var number = BitConverter.ToInt64(buffer, 0);
+
                 setter(item, number);
             };
         }

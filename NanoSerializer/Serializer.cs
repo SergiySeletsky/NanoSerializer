@@ -145,7 +145,10 @@ namespace NanoSerializer
         {
             var item = new T();
 
-            return (T)Deserialize(item, typeof(T), data);
+            using (var ms = new MemoryStream(data))
+            {
+                return (T)Deserialize(item, typeof(T), ms);
+            }
         }
 
         /// <summary>
@@ -158,14 +161,16 @@ namespace NanoSerializer
         {
             var instance = Activator.CreateInstance(type);
 
-            return Deserialize(instance, type, data);
+            using (var ms = new MemoryStream(data))
+            {
+                return Deserialize(instance, type, ms);
+            }
         }
 
-        private object Deserialize(object instance, Type type, byte[] data)
+        private object Deserialize(object instance, Type type, MemoryStream data)
         {
             var source = runtime[type];
 
-            source.Index = 0;
             foreach (var getter in source.Getters)
             {
                 getter(instance, data);

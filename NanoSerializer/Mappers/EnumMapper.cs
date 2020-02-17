@@ -12,11 +12,13 @@ namespace NanoSerializer.Mappers
             return type.BaseType == typeof(Enum);
         }
 
-        public override Action<object, byte[]> Get(Mapper source, Action<object, object> setter)
+        public override Action<object, MemoryStream> Get(Mapper source, Action<object, object> setter)
         {
-            return (item, buffer) => {
-                var value = Buffer.GetByte(buffer, source.Index);
-                source.Index += sizeof(byte);
+            return (item, stream) => {
+                var buffer = new byte[sizeof(byte)];
+                stream.Read(buffer, 0, sizeof(byte));
+                var value = Buffer.GetByte(buffer, 0);
+
                 setter(item, value);
             };
         }

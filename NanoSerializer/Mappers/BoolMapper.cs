@@ -11,11 +11,14 @@ namespace NanoSerializer.Mappers
             return type == typeof(bool);
         }
 
-        public override Action<object, byte[]> Get(Mapper source, Action<object, object> setter)
+        public override Action<object, MemoryStream> Get(Mapper source, Action<object, object> setter)
         {
-            return (item, buffer) => {
-                var boolean = BitConverter.ToBoolean(buffer, source.Index);
-                source.Index += sizeof(bool);
+            return (item, stream) => {
+                var buffer = new byte[sizeof(bool)];
+                stream.Read(buffer, 0, sizeof(bool));
+
+                var boolean = BitConverter.ToBoolean(buffer, 0);
+
                 setter(item, boolean);
             };
         }
