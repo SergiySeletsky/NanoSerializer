@@ -23,8 +23,8 @@ namespace NanoSerializer.Mappers
         public override Action<object, Stream> Set(Func<object, object> getter)
         {
             return (obj, stream) => {
-                var prop = getter(obj);
-                stream.WriteByte((byte)prop);
+                var prop = (byte)getter(obj);
+                stream.WriteByte(prop);
             };
         }
     }

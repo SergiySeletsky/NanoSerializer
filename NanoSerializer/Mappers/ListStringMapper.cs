@@ -31,14 +31,12 @@ namespace NanoSerializer.Mappers
         public override Action<object, Stream> Set(Func<object, object> getter)
         {
             return (obj, stream) => {
-                var prop = getter(obj);
-
-                var list = (List<string>)prop;
+                var prop = (List<string>)getter(obj);
 
                 Span<byte> span = new byte[0];
-                if (list.Any())
+                if (prop.Any())
                 {
-                    var text = list.Aggregate((i, j) => i + "|" + j);
+                    var text = prop.Aggregate((i, j) => i + "|" + j);
                     span = Encoding.UTF8.GetBytes(text);
                 }
                 ReadOnlySpan<byte> length = BitConverter.GetBytes((ushort)span.Length);

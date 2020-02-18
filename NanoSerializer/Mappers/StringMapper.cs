@@ -31,9 +31,9 @@ namespace NanoSerializer.Mappers
         public override Action<object, Stream> Set(Func<object, object> getter)
         {
             return (obj, stream) => {
-                var prop = getter(obj);
-                var text = (string)prop;
-                ReadOnlySpan<byte> span = Encoding.UTF8.GetBytes(text);
+                var prop = (string)getter(obj);
+
+                ReadOnlySpan<byte> span = Encoding.UTF8.GetBytes(prop);
                 ReadOnlySpan<byte> length = BitConverter.GetBytes((ushort)span.Length);
 
                 stream.Write(length);
