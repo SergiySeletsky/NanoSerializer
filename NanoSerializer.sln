@@ -5,8 +5,6 @@ VisualStudioVersion = 16.0.29806.167
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NanoSerializer", "NanoSerializer\NanoSerializer.csproj", "{B27C12CE-0088-4655-AF61-3C12EAF43D3B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NanoSerializer.Example", "NanoSerializer.Example\NanoSerializer.Example.csproj", "{B4CC36EE-2AD7-40C5-816F-28395CCDAB39}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NanoSerializer.Tests", "NanoSerializer.Tests\NanoSerializer.Tests.csproj", "{CC01E50F-F38F-4EB1-ABC1-2C33350F2A33}"
 EndProject
 Global
@@ -19,10 +17,6 @@ Global
 		{B27C12CE-0088-4655-AF61-3C12EAF43D3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B27C12CE-0088-4655-AF61-3C12EAF43D3B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B27C12CE-0088-4655-AF61-3C12EAF43D3B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B4CC36EE-2AD7-40C5-816F-28395CCDAB39}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B4CC36EE-2AD7-40C5-816F-28395CCDAB39}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B4CC36EE-2AD7-40C5-816F-28395CCDAB39}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B4CC36EE-2AD7-40C5-816F-28395CCDAB39}.Release|Any CPU.Build.0 = Release|Any CPU
 		{CC01E50F-F38F-4EB1-ABC1-2C33350F2A33}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{CC01E50F-F38F-4EB1-ABC1-2C33350F2A33}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CC01E50F-F38F-4EB1-ABC1-2C33350F2A33}.Release|Any CPU.ActiveCfg = Release|Any CPU
