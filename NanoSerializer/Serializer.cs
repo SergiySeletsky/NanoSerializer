@@ -95,7 +95,7 @@ namespace NanoSerializer
                     if (mapper.Can(property.PropertyType))
                     {
                         var setter = BuildSetAccessor(property.SetMethod);
-                        var getMapper = mapper.Get(builder, setter);
+                        var getMapper = mapper.Get(setter);
                         builder.Getters.Add(getMapper);
 
                         var getter = BuildGetAccessor(property.GetMethod);
