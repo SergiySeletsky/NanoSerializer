@@ -86,8 +86,6 @@ namespace NanoSerializer
 
             foreach (var property in properties)
             {
-                var setter = BuildSetAccessor(property.SetMethod);
-                var getter = BuildGetAccessor(property.GetMethod);
                 foreach (var mapper in mappers)
                 {
                     if (mapper is ComplexMapper)
@@ -96,9 +94,11 @@ namespace NanoSerializer
                     }
                     if (mapper.Can(property.PropertyType))
                     {
+                        var setter = BuildSetAccessor(property.SetMethod);
                         var getMapper = mapper.Get(builder, setter);
                         builder.Getters.Add(getMapper);
 
+                        var getter = BuildGetAccessor(property.GetMethod);
                         var setMapper = mapper.Set(getter);
                         builder.Setters.Add(setMapper);
                         break;
