@@ -14,8 +14,8 @@ namespace NanoSerializer
     /// </summary>
     public sealed class Serializer
     {
-        private readonly Dictionary<Type, Mapper> runtime = new Dictionary<Type, Mapper>();
         private static readonly List<TypeMapper> mappers = new List<TypeMapper>();
+        private readonly Dictionary<Type, Mapper> runtime = new Dictionary<Type, Mapper>();
 
         static Serializer()
         {
@@ -146,14 +146,14 @@ namespace NanoSerializer
         /// <returns>New instance of deserialized contract</returns>
         public T Deserialize<T>(byte[] data) where T : new()
         {
-            var item = new T();
+            var instance = new T();
 
-            using (var ms = new MemoryStream(data))
+            using (var stream = new MemoryStream(data))
             {
-                Deserialize(item, typeof(T), ms);
+                Deserialize(instance, typeof(T), stream);
             }
 
-            return item;
+            return instance;
         }
 
         internal void Deserialize(object instance, Type type, Stream stream)
