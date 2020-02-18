@@ -119,11 +119,7 @@ namespace NanoSerializer
         public void Serialize(object instance, Stream stream)
         {
             var source = runtime[instance.GetType()];
-
-            foreach (var setter in source.Setters)
-            {
-                setter(instance, stream);
-            }
+            source.Setters.ForEach(setter => setter(instance, stream));
         }
 
         /// <summary>
@@ -160,14 +156,10 @@ namespace NanoSerializer
             return item;
         }
 
-        internal void Deserialize(object instance, Type type, Stream data)
+        internal void Deserialize(object instance, Type type, Stream stream)
         {
             var source = runtime[type];
-
-            foreach (var getter in source.Getters)
-            {
-                getter(instance, data);
-            }
+            source.Getters.ForEach(getter => getter(instance, stream));
         }
     }
 }
