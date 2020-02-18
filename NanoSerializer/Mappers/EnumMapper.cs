@@ -14,17 +14,17 @@ namespace NanoSerializer.Mappers
 
         public override Action<object, Stream> Get(Mapper source, Action<object, object> setter)
         {
-            return (item, stream) => {
+            return (obj, stream) => {
                 var value = (byte)stream.ReadByte();
-                setter(item, value);
+                setter(obj, value);
             };
         }
 
         public override Action<object, Stream> Set(Func<object, object> getter)
         {
-            return (src, stream) => {
-                var item = getter(src);
-                stream.WriteByte((byte)item);
+            return (obj, stream) => {
+                var prop = getter(obj);
+                stream.WriteByte((byte)prop);
             };
         }
     }

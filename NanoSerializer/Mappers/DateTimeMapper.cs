@@ -13,21 +13,21 @@ namespace NanoSerializer.Mappers
 
         public override Action<object, Stream> Get(Mapper source, Action<object, object> setter)
         {
-            return (item, stream) => {
+            return (obj, stream) => {
                 Span<byte> span = new byte[sizeof(long)];
                 stream.Read(span);
 
                 var ticks = BitConverter.ToInt64(span);
 
-                setter(item, new DateTime(ticks));
+                setter(obj, new DateTime(ticks));
             };
         }
 
         public override Action<object, Stream> Set(Func<object, object> getter)
         {
-            return (src, stream) => {
-                var item = getter(src);
-                var dateTime = (DateTime)item;
+            return (obj, stream) => {
+                var prop = getter(obj);
+                var dateTime = (DateTime)prop;
                 ReadOnlySpan<byte> span = BitConverter.GetBytes(dateTime.Ticks);
                 stream.Write(span);
             };

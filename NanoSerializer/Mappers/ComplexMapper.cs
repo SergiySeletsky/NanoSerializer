@@ -23,7 +23,7 @@ namespace NanoSerializer.Mappers
 
         public override Action<object, Stream> Get(Mapper source, Action<object, object> setter)
         {
-            return (item, stream) => {
+            return (obj, stream) => {
 
                 var length = stream.ReadLength();
 
@@ -31,21 +31,21 @@ namespace NanoSerializer.Mappers
                 {
                     var instance = Activator.CreateInstance(type);
                     serializer.Deserialize(instance, type, stream);
-                    setter(item, instance);
+                    setter(obj, instance);
                 }
             };
         }
 
         public override Action<object, Stream> Set(Func<object, object> getter)
         {
-            return (src, stream) => {
-                var item = getter(src);
+            return (obj, stream) => {
+                var prop = getter(obj);
 
-                using (var innerStream = new MemoryStream())
+                if (prop != null)
                 {
-                    if (item != null)
+                    using (var innerStream = new MemoryStream())
                     {
-                        serializer.Serialize(item, innerStream);
+                        serializer.Serialize(prop, innerStream);
 
                         ReadOnlySpan<byte> length = BitConverter.GetBytes((ushort)innerStream.Length);
 
