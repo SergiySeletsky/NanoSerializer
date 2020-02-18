@@ -29,9 +29,14 @@ namespace NanoSerializer.Mappers
 
                 if (length != 0)
                 {
-                    var instance = Activator.CreateInstance(type);
-                    serializer.Deserialize(instance, type, stream);
-                    setter(obj, instance);
+                    Span<byte> span = stackalloc byte[length];
+                    stream.Read(span);
+                    using (var innerStream = new MemoryStream(span.ToArray()))
+                    {
+                        var instance = Activator.CreateInstance(type);
+                        serializer.Deserialize(instance, type, innerStream);
+                        setter(obj, instance);
+                    }
                 }
             };
         }

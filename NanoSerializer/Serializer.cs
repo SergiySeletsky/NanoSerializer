@@ -80,7 +80,9 @@ namespace NanoSerializer
         {
             var builder = new Mapper();
 
-            var properties = type.GetRuntimeProperties().OrderBy(f => f.GetCustomAttribute<DataMemberAttribute>().Order);
+            var properties = type.GetRuntimeProperties()
+                .Where(f => f.GetCustomAttribute<DataMemberAttribute>() != null)
+                .OrderBy(f => f.GetCustomAttribute<DataMemberAttribute>().Order);
 
             foreach (var property in properties)
             {

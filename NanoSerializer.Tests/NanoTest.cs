@@ -25,6 +25,7 @@ namespace NanoSerializer.Tests
             Assert.Equal(instance.Active, value.Active);
             Assert.Equal(instance.Bytes, value.Bytes);
             Assert.Equal(instance.Contract.Text, value.Contract.Text);
+            Assert.Equal(instance.Contract2.Text, value.Contract2.Text);
             Assert.Equal(instance.Count, value.Count);
             Assert.Equal(instance.Date, value.Date);
             Assert.Equal(instance.Number, value.Number);
@@ -91,7 +92,7 @@ namespace NanoSerializer.Tests
 
                 Assert.Equal(instance.Active, value.Active);
                 Assert.Equal(instance.Bytes, value.Bytes);
-                Assert.Equal(instance.Contract.Text, value.Contract.Text);
+                Assert.Equal(instance.Contract2.Text, value.Contract2.Text);
                 Assert.Equal(instance.Count, value.Count);
                 Assert.Equal(instance.Date, value.Date);
                 Assert.Equal(instance.Number, value.Number);
