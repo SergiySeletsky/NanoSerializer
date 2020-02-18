@@ -7,10 +7,11 @@ namespace NanoSerializer.Tests
 {
     public class NanoTest : BaseTest
     {
-        private Serializer serializer;
+        private readonly Serializer serializer;
 
         public NanoTest()
         {
+            // var types = type.Assembly.DefinedTypes.Where(t => t.CustomAttributes.Any(a => a.AttributeType == typeof(DataContractAttribute)));
             serializer = new Serializer(typeof(TestContract));
         }
 

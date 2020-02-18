@@ -14,19 +14,19 @@ namespace NanoSerializer
     /// </summary>
     public sealed class Serializer
     {
-        private static readonly List<TypeMapper> mappers = new List<TypeMapper>();
-        private readonly Dictionary<Type, Mapper> runtime = new Dictionary<Type, Mapper>();
-
-        static Serializer()
+        private static readonly List<TypeMapper> mappers = new List<TypeMapper>
         {
-            var typeMapper = typeof(TypeMapper);
-            var mapperTypes = typeMapper.GetTypeInfo().Assembly.DefinedTypes.Where(f => f.BaseType == typeMapper);
-            foreach (var mapperType in mapperTypes)
-            {
-                var mapper = (TypeMapper)Activator.CreateInstance(mapperType.AsType());
-                mappers.Add(mapper);
-            }
-        }
+            new BoolMapper(),
+            new ByteArrayMapper(),
+            new ComplexMapper(),
+            new DateTimeMapper(),
+            new EnumMapper(),
+            new IntMapper(),
+            new ListStringMapper(),
+            new LongMapper(),
+            new StringMapper()
+        };
+        private readonly Dictionary<Type, Mapper> runtime = new Dictionary<Type, Mapper>();
 
         /// <summary>
         /// Register your custom type mapper
@@ -46,10 +46,8 @@ namespace NanoSerializer
         /// Builds instance of serializer for all data contracts in type assembly
         /// </summary>
         /// <param name="type">Any type from your data contracts assembly</param>
-        public Serializer(Type type)
+        public Serializer(params Type[] types)
         {
-            var types = type.Assembly.DefinedTypes.Where(t => t.CustomAttributes.Any(a => a.AttributeType == typeof(DataContractAttribute)));
-
             foreach (var typeItem in types)
             {
                 Register(typeItem);
