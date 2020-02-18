@@ -178,14 +178,14 @@ namespace NanoSerializer
         {
             var instance = new T();
 
-            Deserialize(instance, typeof(T), stream);
+            Deserialize(instance, stream);
 
             return instance;
         }
 
-        internal void Deserialize(object instance, Type type, Stream stream)
+        internal void Deserialize(object instance, Stream stream)
         {
-            var source = runtime[type];
+            var source = runtime[instance.GetType()];
             source.Getters.ForEach(getter => getter(instance, stream));
         }
     }

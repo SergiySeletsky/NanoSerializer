@@ -8,7 +8,6 @@ namespace NanoSerializer.Mappers
     internal class ComplexMapper : TypeMapper
     {
         private Serializer serializer;
-        private Type type;
 
         public void Use(Serializer serializer)
         {
@@ -17,7 +16,6 @@ namespace NanoSerializer.Mappers
 
         public override bool Can(Type type)
         {
-            this.type = type;
             return !type.IsPrimitive && type.IsClass && !type.Namespace.StartsWith("System");
         }
 
@@ -33,8 +31,8 @@ namespace NanoSerializer.Mappers
                     stream.Read(span);
                     using (var innerStream = new MemoryStream(span.ToArray()))
                     {
-                        var instance = Activator.CreateInstance(type);
-                        serializer.Deserialize(instance, type, innerStream);
+                        var instance = Activator.CreateInstance(obj.GetType());
+                        serializer.Deserialize(instance, innerStream);
                         setter(obj, instance);
                     }
                 }
