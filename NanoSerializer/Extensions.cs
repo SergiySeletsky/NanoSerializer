@@ -7,11 +7,9 @@ namespace NanoSerializer
 {
     internal static class Extensions
     {
-        internal const int lengthSize = 2;
-
         internal static short ReadLength(this Stream stream)
         {
-            Span<byte> span = stackalloc byte[lengthSize];
+            Span<byte> span = stackalloc byte[sizeof(short)];
 
             stream.Read(span);
 
