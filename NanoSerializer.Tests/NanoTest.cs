@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
@@ -18,7 +19,7 @@ namespace NanoSerializer.Tests
         [Fact]
         public void TestNanoFeatures()
         {
-            byte[] data = serializer.Serialize(instance);
+            ReadOnlySpan<byte> data = serializer.Serialize(instance);
             var value = serializer.Deserialize<TestContract>(data);
 
             Assert.Equal(instance.Active, value.Active);

@@ -144,6 +144,20 @@ namespace NanoSerializer
         /// <typeparam name="T">Serialization type</typeparam>
         /// <param name="data">Byte array</param>
         /// <returns>New instance of deserialized contract</returns>
+        public T Deserialize<T>(ReadOnlySpan<byte> data) where T : new()
+        {
+            using (var stream = new MemoryStream(data.ToArray()))
+            {
+                return Deserialize<T>(stream);
+            }
+        }
+
+        /// <summary>
+        /// Deserialize type from byte array
+        /// </summary>
+        /// <typeparam name="T">Serialization type</typeparam>
+        /// <param name="data">Byte array</param>
+        /// <returns>New instance of deserialized contract</returns>
         public T Deserialize<T>(byte[] data) where T : new()
         {
             using (var stream = new MemoryStream(data))
