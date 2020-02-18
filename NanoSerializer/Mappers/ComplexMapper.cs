@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace NanoSerializer.Mappers
 {
@@ -21,38 +22,38 @@ namespace NanoSerializer.Mappers
             return !type.IsPrimitive && type.IsClass && !type.Namespace.StartsWith("System");
         }
 
-        public override Action<object, Stream> Get(Mapper source, Action<object, object> setter)
+        public override Func<object, Stream, Task> Get(Mapper source, Action<object, object> setter)
         {
-            return (item, stream) => {
+            return async (item, stream) => {
 
-                var length = stream.ReadLength();
+                var length = await stream.ReadLengthAsync();
 
                 if (length != 0)
                 {
                     var instance = Activator.CreateInstance(type);
-                    serializer.Deserialize(instance, type, stream);
+                    await serializer.DeserializeAsync(instance, type, stream);
                     setter(item, instance);
                 }
             };
         }
 
-        public override Action<object, Stream> Set(Func<object, object> getter)
+        public override Func<object, Stream, Task> Set(Func<object, object> getter)
         {
-            return (src, stream) => {
+            return async (src, stream) => {
                 var item = getter(src);
 
-                using (var ms = new MemoryStream())
+                if (item != null)
                 {
-                    if (item != null)
+                    using (var ms = new MemoryStream())
                     {
-                        serializer.Serialize(item, ms);
+                        await serializer.SerializeAsync(item, ms);
 
-                        ReadOnlySpan<byte> length = BitConverter.GetBytes((ushort)ms.Length);
+                        ReadOnlyMemory<byte> length = BitConverter.GetBytes((ushort)ms.Length);
 
-                        stream.Write(length);
+                        await stream.WriteAsync(length);
 
                         ms.Position = 0;
-                        ms.CopyTo(stream);
+                        await ms.CopyToAsync(stream);
                     }
                 }
             };

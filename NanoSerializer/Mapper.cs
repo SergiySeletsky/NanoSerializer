@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace NanoSerializer
 {
@@ -10,8 +11,8 @@ namespace NanoSerializer
     /// </summary>
     public class Mapper
     {
-        internal List<Action<object, Stream>> Getters = new List<Action<object, Stream>>();
+        internal List<Func<object, Stream, Task>> Getters = new List<Func<object, Stream, Task>>();
 
-        internal List<Action<object, Stream>> Setters = new List<Action<object, Stream>>();
+        internal List<Func<object, Stream, Task>> Setters = new List<Func<object, Stream, Task>>();
     }
 }

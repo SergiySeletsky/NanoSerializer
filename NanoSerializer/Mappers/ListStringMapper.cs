@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace NanoSerializer.Mappers
 {
@@ -13,38 +14,38 @@ namespace NanoSerializer.Mappers
             return type == typeof(List<string>);
         }
 
-        public override Action<object, Stream> Get(Mapper source, Action<object, object> setter)
+        public override Func<object, Stream, Task> Get(Mapper source, Action<object, object> setter)
         {
-            return (item, stream) => {
-                var length = stream.ReadLength();
+            return async (item, stream) => {
+                var length = await stream.ReadLengthAsync();
 
-                Span<byte> span = stackalloc byte[length];
+                Memory<byte> memory = new byte[length];
 
-                stream.Read(span);
+                await stream.ReadAsync(memory);
 
-                var list = Encoding.UTF8.GetString(span).Split('|').ToList();
+                var list = Encoding.UTF8.GetString(memory.Span).Split('|').ToList();
 
                 setter(item, list);
             };
         }
 
-        public override Action<object, Stream> Set(Func<object, object> getter)
+        public override Func<object, Stream, Task> Set(Func<object, object> getter)
         {
-            return (src, stream) => {
+            return async (src, stream) => {
                 var item = getter(src);
 
                 var list = (List<string>)item;
 
-                Span<byte> bytes = new byte[0];
+                Memory<byte> bytes = new byte[0];
                 if (list.Any())
                 {
                     var text = list.Aggregate((i, j) => i + "|" + j);
                     bytes = Encoding.UTF8.GetBytes(text);
                 }
-                ReadOnlySpan<byte> length = BitConverter.GetBytes((ushort)bytes.Length);
+                ReadOnlyMemory<byte> length = BitConverter.GetBytes((ushort)bytes.Length);
 
-                stream.Write(length);
-                stream.Write(bytes);
+                await stream.WriteAsync(length);
+                await stream.WriteAsync(bytes);
             };
         }
     }

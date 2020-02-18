@@ -6,6 +6,7 @@ using System.Runtime.Serialization;
 using System.Reflection;
 using NanoSerializer.Mappers;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace NanoSerializer
 {
@@ -19,13 +20,15 @@ namespace NanoSerializer
 
         static Serializer()
         {
-            var typeMapper = typeof(TypeMapper);
-            var mapperTypes = typeMapper.GetTypeInfo().Assembly.DefinedTypes.Where(f => f.BaseType == typeMapper);
-            foreach (var mapperType in mapperTypes)
-            {
-                var mapper = (TypeMapper)Activator.CreateInstance(mapperType.AsType());
-                mappers.Add(mapper);
-            }
+            mappers.Add(new BoolMapper());
+            mappers.Add(new ByteArrayMapper());
+            mappers.Add(new ComplexMapper());
+            mappers.Add(new DateTimeMapper());
+            mappers.Add(new EnumMapper());
+            mappers.Add(new IntMapper());
+            mappers.Add(new ListStringMapper());
+            mappers.Add(new LongMapper());
+            mappers.Add(new StringMapper());
         }
 
         /// <summary>
@@ -58,7 +61,7 @@ namespace NanoSerializer
 
         private static Action<object, object> BuildSetAccessor(MethodInfo method)
         {
-            var obj = Expression.Parameter(typeof(object), "o");
+            var obj = Expression.Parameter(typeof(object), string.Empty);
             var value = Expression.Parameter(typeof(object));
             var convert = Expression.Convert(value, method.GetParameters()[0].ParameterType);
             var call = Expression.Call(Expression.Convert(obj, method.DeclaringType), method, convert);
@@ -68,7 +71,7 @@ namespace NanoSerializer
 
         private static Func<object, object> BuildGetAccessor(MethodInfo method)
         {
-            var obj = Expression.Parameter(typeof(object), "o");
+            var obj = Expression.Parameter(typeof(object), string.Empty);
             var call = Expression.Call(Expression.Convert(obj, method.DeclaringType), method);
             var convert = Expression.Convert(call, typeof(object));
             var expr = Expression.Lambda<Func<object, object>>(convert, obj);
@@ -116,14 +119,10 @@ namespace NanoSerializer
         /// <param name="source">Serializer build model</param>
         /// <param name="instance">Instance of serializable type</param>
         /// <returns>Byte array</returns>
-        public void Serialize(object instance, Stream stream)
+        public async Task SerializeAsync(object instance, Stream stream)
         {
             var source = runtime[instance.GetType()];
-
-            foreach (var setter in source.Setters)
-            {
-                setter(instance, stream);
-            }
+            await Task.WhenAll(source.Setters.Select(setter => setter(instance, stream)));
         }
 
         /// <summary>
@@ -133,11 +132,11 @@ namespace NanoSerializer
         /// <param name="source">Serializer build model</param>
         /// <param name="instance">Instance of serializable type</param>
         /// <returns>Byte array</returns>
-        public byte[] Serialize(object instance)
+        public async Task<byte[]> SerializeAsync(object instance)
         {
             using (var stream = new MemoryStream())
             {
-                Serialize(instance, stream);
+                await SerializeAsync(instance, stream);
                 return stream.ToArray();
             }
         }
@@ -148,26 +147,22 @@ namespace NanoSerializer
         /// <typeparam name="T">Serialization type</typeparam>
         /// <param name="data">Byte array</param>
         /// <returns>New instance of deserialized contract</returns>
-        public T Deserialize<T>(byte[] data) where T : new()
+        public async Task<T> DeserializeAsync<T>(byte[] data) where T : new()
         {
             var item = new T();
 
             using (var ms = new MemoryStream(data))
             {
-                Deserialize(item, typeof(T), ms);
+                await DeserializeAsync(item, typeof(T), ms);
             }
 
             return item;
         }
 
-        internal void Deserialize(object instance, Type type, Stream data)
+        internal async Task DeserializeAsync(object instance, Type type, Stream data)
         {
             var source = runtime[type];
-
-            foreach (var getter in source.Getters)
-            {
-                getter(instance, data);
-            }
+            await Task.WhenAll(source.Getters.Select(getter => getter(instance, data)));
         }
     }
 }

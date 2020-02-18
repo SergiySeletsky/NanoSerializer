@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace NanoSerializer.Mappers
 {
@@ -12,19 +13,25 @@ namespace NanoSerializer.Mappers
             return type.BaseType == typeof(Enum);
         }
 
-        public override Action<object, Stream> Get(Mapper source, Action<object, object> setter)
+        public override Func<object, Stream, Task> Get(Mapper source, Action<object, object> setter)
         {
-            return (item, stream) => {
-                var value = (byte)stream.ReadByte();
+            return async (item, stream) => {
+                Memory<byte> memory = new byte[sizeof(byte)];
+                await stream.ReadAsync(memory);
+
+                var value = memory.Span[0];
                 setter(item, value);
             };
         }
 
-        public override Action<object, Stream> Set(Func<object, object> getter)
+        public override Func<object, Stream, Task> Set(Func<object, object> getter)
         {
-            return (src, stream) => {
+            return async (src, stream) => {
                 var item = getter(src);
-                stream.WriteByte((byte)item);
+
+                ReadOnlyMemory<byte> memory = new byte[] { (byte)item };
+
+                await stream.WriteAsync(memory);
             };
         }
     }

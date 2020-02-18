@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace NanoSerializer.Mappers
 {
@@ -11,23 +12,23 @@ namespace NanoSerializer.Mappers
             return type == typeof(int);
         }
 
-        public override Action<object, Stream> Get(Mapper source, Action<object, object> setter)
+        public override Func<object, Stream, Task> Get(Mapper source, Action<object, object> setter)
         {
-            return (item, stream) => {
-                Span<byte> span = stackalloc byte[sizeof(int)];
-                stream.Read(span);
-                var number = BitConverter.ToInt32(span);
+            return async (item, stream) => {
+                Memory<byte> memory = new byte[sizeof(int)];
+                await stream.ReadAsync(memory);
+                var number = BitConverter.ToInt32(memory.Span);
 
                 setter(item, number);
             };
         }
 
-        public override Action<object, Stream> Set(Func<object, object> getter)
+        public override Func<object, Stream, Task> Set(Func<object, object> getter)
         {
-            return (src, stream) => {
+            return async (src, stream) => {
                 var item = getter(src);
-                ReadOnlySpan<byte> bytes = BitConverter.GetBytes((int)item);
-                stream.Write(bytes);
+                ReadOnlyMemory<byte> memory = BitConverter.GetBytes((int)item);
+                await stream.WriteAsync(memory);
             };
         }
     }

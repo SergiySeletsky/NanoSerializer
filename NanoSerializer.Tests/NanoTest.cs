@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace NanoSerializer.Tests
@@ -13,10 +14,10 @@ namespace NanoSerializer.Tests
         }
 
         [Fact]
-        public void TestNanoFeatures()
+        public async Task TestNanoFeatures()
         {
-            byte[] data = serializer.Serialize(instance);
-            var value = serializer.Deserialize<TestContract>(data);
+            byte[] data = await serializer.SerializeAsync(instance);
+            var value = await serializer.DeserializeAsync<TestContract>(data);
 
             Assert.Equal(instance.Active, value.Active);
             Assert.Equal(instance.Bytes, value.Bytes);
@@ -30,12 +31,12 @@ namespace NanoSerializer.Tests
         }
 
         [Fact]
-        public void TestNanoSerialize()
+        public async Task TestNanoSerialize()
         {
             var sw = Stopwatch.StartNew();
             for (var i = 0; i < count; i++)
             {
-                var data = serializer.Serialize(instance);
+                var data = await serializer.SerializeAsync(instance);
             }
             sw.Stop();
 
@@ -43,16 +44,16 @@ namespace NanoSerializer.Tests
         }
 
         [Fact]
-        public void TestNanoDeserialize()
+        public async Task TestNanoDeserialize()
         {
-            byte[] data = serializer.Serialize(instance);
+            byte[] data = await serializer.SerializeAsync(instance);
 
             Trace.WriteLine($"NANO Size: {data.Length} bytes.");
 
             var sw = Stopwatch.StartNew();
             for (var i = 0; i < count; i++)
             {
-                var value = serializer.Deserialize<TestContract>(data);
+                var value = await serializer.DeserializeAsync<TestContract>(data);
             }
             sw.Stop();
 
