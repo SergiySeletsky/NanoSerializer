@@ -24,6 +24,24 @@ namespace NanoSerializer.Tests
                 Date = DateTime.Now,
                 Number = 111222333,
                 Active = true
+            },
+            Contract2 = new TestContract() //Complex type
+            {
+                Text = "NanoSerializer is super fast and compact binary data contract serializer",
+                Count = 35346457567,
+                Bytes = new byte[400],
+                Date = DateTime.Now,
+                Number = 111222333,
+                Active = true,
+                Contract = new TestContract() //Complex type
+                {
+                    Text = "NanoSerializer is super fast and compact binary data contract serializer",
+                    Count = 35346457567,
+                    Bytes = new byte[400],
+                    Date = DateTime.Now,
+                    Number = 111222333,
+                    Active = true
+                }
             }
         };
     }

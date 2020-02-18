@@ -14,18 +14,13 @@ namespace NanoSerializer.Mappers
         public override Action<object, Stream> Get(Mapper source, Action<object, object> setter)
         {
             return (item, stream) => {
+                var length = stream.ReadLength();
 
-                var buffer = new byte[lengthSize];
+                Span<byte> data = stackalloc byte[length];
 
-                stream.Read(buffer, 0, lengthSize);
+                stream.Read(data);
 
-                var length = BitConverter.ToInt16(buffer, 0);
-
-                var data = new byte[length];
-
-                stream.Read(data, 0, length);
-
-                setter(item, data);
+                setter(item, data.ToArray());
             };
         }
 
@@ -33,11 +28,11 @@ namespace NanoSerializer.Mappers
         {
             return (src, stream) => {
                 var item = getter(src);
-                var bytes = (byte[])item;
-                var length = BitConverter.GetBytes((ushort)bytes.Length);
+                ReadOnlySpan<byte> bytes = (byte[])item;
+                ReadOnlySpan<byte> length = BitConverter.GetBytes((ushort)bytes.Length);
 
-                stream.Write(length, 0, length.Length);
-                stream.Write(bytes, 0, bytes.Length);
+                stream.Write(length);
+                stream.Write(bytes);
             };
         }
     }

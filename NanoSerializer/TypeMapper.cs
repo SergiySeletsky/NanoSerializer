@@ -7,8 +7,6 @@ namespace NanoSerializer
 {
     public abstract class TypeMapper
     {
-        protected const int lengthSize = 2;
-
         public abstract bool Can(Type type);
 
         public abstract Action<object, Stream> Get(Mapper source, Action<object, object> setter);

@@ -15,10 +15,7 @@ namespace NanoSerializer.Mappers
         public override Action<object, Stream> Get(Mapper source, Action<object, object> setter)
         {
             return (item, stream) => {
-                var buffer = new byte[sizeof(byte)];
-                stream.Read(buffer, 0, sizeof(byte));
-                var value = Buffer.GetByte(buffer, 0);
-
+                var value = (byte)stream.ReadByte();
                 setter(item, value);
             };
         }

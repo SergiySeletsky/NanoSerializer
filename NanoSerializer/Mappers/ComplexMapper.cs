@@ -25,19 +25,13 @@ namespace NanoSerializer.Mappers
         {
             return (item, stream) => {
 
-                var buffer = new byte[lengthSize];
-                stream.Read(buffer, 0, lengthSize);
-                var length = BitConverter.ToInt16(buffer, 0);
+                var length = stream.ReadLength();
 
                 if (length != 0)
                 {
-                    var data = new byte[length];
-
-                    stream.Read(data, 0, length);
-
-                    var value = serializer.Deserialize(type, data);
-
-                    setter(item, value);
+                    var instance = Activator.CreateInstance(type);
+                    serializer.Deserialize(instance, type, stream);
+                    setter(item, instance);
                 }
             };
         }
@@ -46,11 +40,21 @@ namespace NanoSerializer.Mappers
         {
             return (src, stream) => {
                 var item = getter(src);
-                var bytes = serializer.Serialize(item);
-                var length = BitConverter.GetBytes((ushort)bytes.Length);
 
-                stream.Write(length, 0, length.Length);
-                stream.Write(bytes, 0, bytes.Length);
+                using (var ms = new MemoryStream())
+                {
+                    if (item != null)
+                    {
+                        serializer.Serialize(item, ms);
+
+                        ReadOnlySpan<byte> length = BitConverter.GetBytes((ushort)ms.Length);
+
+                        stream.Write(length);
+
+                        ms.Position = 0;
+                        ms.CopyTo(stream);
+                    }
+                }
             };
         }
     }

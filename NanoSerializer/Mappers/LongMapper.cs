@@ -14,9 +14,9 @@ namespace NanoSerializer.Mappers
         public override Action<object, Stream> Get(Mapper source, Action<object, object> setter)
         {
             return (item, stream) => {
-                var buffer = new byte[sizeof(long)];
-                stream.Read(buffer, 0, sizeof(long));
-                var number = BitConverter.ToInt64(buffer, 0);
+                Span<byte> span = stackalloc byte[sizeof(long)];
+                stream.Read(span);
+                var number = BitConverter.ToInt64(span);
 
                 setter(item, number);
             };
@@ -26,8 +26,8 @@ namespace NanoSerializer.Mappers
         {
             return (src, stream) => {
                 var item = getter(src);
-                var bytes = BitConverter.GetBytes((long)item);
-                stream.Write(bytes, 0, bytes.Length);
+                ReadOnlySpan<byte> bytes = BitConverter.GetBytes((long)item);
+                stream.Write(bytes);
             };
         }
     }

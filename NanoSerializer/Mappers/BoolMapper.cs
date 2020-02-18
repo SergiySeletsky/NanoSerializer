@@ -14,10 +14,10 @@ namespace NanoSerializer.Mappers
         public override Action<object, Stream> Get(Mapper source, Action<object, object> setter)
         {
             return (item, stream) => {
-                var buffer = new byte[sizeof(bool)];
-                stream.Read(buffer, 0, sizeof(bool));
+                Span<byte> span = stackalloc byte[sizeof(bool)];
+                stream.Read(span);
 
-                var boolean = BitConverter.ToBoolean(buffer, 0);
+                var boolean = BitConverter.ToBoolean(span);
 
                 setter(item, boolean);
             };
@@ -27,9 +27,9 @@ namespace NanoSerializer.Mappers
         {
             return (src, stream) => {
                 var item = getter(src);
-                var bytes = BitConverter.GetBytes((bool)item);
+                ReadOnlySpan<byte> bytes = BitConverter.GetBytes((bool)item);
 
-                stream.Write(bytes, 0, bytes.Length);
+                stream.Write(bytes);
             };
         }
     }

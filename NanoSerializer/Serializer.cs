@@ -116,23 +116,30 @@ namespace NanoSerializer
         /// <param name="source">Serializer build model</param>
         /// <param name="instance">Instance of serializable type</param>
         /// <returns>Byte array</returns>
-        public byte[] Serialize(object instance)
+        public void Serialize(object instance, Stream stream)
         {
-            if (instance is null)
-            {
-                return new byte[0];
-            }
-
             var source = runtime[instance.GetType()];
-
-            var stream = new MemoryStream();
 
             foreach (var setter in source.Setters)
             {
                 setter(instance, stream);
             }
+        }
 
-            return stream.ToArray();
+        /// <summary>
+        /// Serialize data contract to byte array
+        /// </summary>
+        /// <typeparam name="T">Serializable type</typeparam>
+        /// <param name="source">Serializer build model</param>
+        /// <param name="instance">Instance of serializable type</param>
+        /// <returns>Byte array</returns>
+        public byte[] Serialize(object instance)
+        {
+            using (var stream = new MemoryStream())
+            {
+                Serialize(instance, stream);
+                return stream.ToArray();
+            }
         }
 
         /// <summary>
@@ -147,27 +154,13 @@ namespace NanoSerializer
 
             using (var ms = new MemoryStream(data))
             {
-                return (T)Deserialize(item, typeof(T), ms);
+                Deserialize(item, typeof(T), ms);
             }
+
+            return item;
         }
 
-        /// <summary>
-        /// Deserialize type from byte array
-        /// </summary>
-        /// <param name="type">Type of object</param>
-        /// <param name="data">Byte array</param>
-        /// <returns>New instance of deserialized contract</returns>
-        public object Deserialize(Type type, byte[] data)
-        {
-            var instance = Activator.CreateInstance(type);
-
-            using (var ms = new MemoryStream(data))
-            {
-                return Deserialize(instance, type, ms);
-            }
-        }
-
-        private object Deserialize(object instance, Type type, Stream data)
+        internal void Deserialize(object instance, Type type, Stream data)
         {
             var source = runtime[type];
 
@@ -175,8 +168,6 @@ namespace NanoSerializer
             {
                 getter(instance, data);
             }
-
-            return instance;
         }
     }
 }

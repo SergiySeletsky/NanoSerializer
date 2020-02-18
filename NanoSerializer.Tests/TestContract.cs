@@ -43,5 +43,11 @@ namespace NanoSerializer.Tests
         /// </summary>
         [DataMember(Order = 9)]
         public TestContract Contract { get; set; }
+
+        /// <summary>
+        /// Complex type 2
+        /// </summary>
+        [DataMember(Order = 10)]
+        public TestContract Contract2 { get; set; }
     }
 }
