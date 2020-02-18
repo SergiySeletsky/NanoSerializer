@@ -58,7 +58,7 @@ namespace NanoSerializer
 
         private static Action<object, object> BuildSetAccessor(MethodInfo method)
         {
-            var obj = Expression.Parameter(typeof(object), "o");
+            var obj = Expression.Parameter(typeof(object), string.Empty);
             var value = Expression.Parameter(typeof(object));
             var convert = Expression.Convert(value, method.GetParameters()[0].ParameterType);
             var call = Expression.Call(Expression.Convert(obj, method.DeclaringType), method, convert);
@@ -68,7 +68,7 @@ namespace NanoSerializer
 
         private static Func<object, object> BuildGetAccessor(MethodInfo method)
         {
-            var obj = Expression.Parameter(typeof(object), "o");
+            var obj = Expression.Parameter(typeof(object), string.Empty);
             var call = Expression.Call(Expression.Convert(obj, method.DeclaringType), method);
             var convert = Expression.Convert(call, typeof(object));
             var expr = Expression.Lambda<Func<object, object>>(convert, obj);
