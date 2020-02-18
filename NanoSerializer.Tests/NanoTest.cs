@@ -1,4 +1,6 @@
 using System.Diagnostics;
+using System.IO;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace NanoSerializer.Tests
@@ -53,6 +55,47 @@ namespace NanoSerializer.Tests
             for (var i = 0; i < count; i++)
             {
                 var value = serializer.Deserialize<TestContract>(data);
+            }
+            sw.Stop();
+
+            Trace.WriteLine($"NANO Deserialize: {sw.ElapsedMilliseconds} ms.\n");
+        }
+
+        [Fact]
+        public void TestNanoParallelize()
+        {
+            var sw = Stopwatch.StartNew();
+            Parallel.For(0, count, i =>
+            {
+                using (var stream = new MemoryStream())
+                {
+                    serializer.Serialize(instance, stream);
+                    var value = serializer.Deserialize<TestContract>(stream);
+                }
+            });
+            sw.Stop();
+
+            Trace.WriteLine($"NANO Deserialize: {sw.ElapsedMilliseconds} ms.\n");
+        }
+
+        [Fact]
+        public void TestNanoStream()
+        {
+            var sw = Stopwatch.StartNew();
+            using (var stream = new MemoryStream())
+            {
+                serializer.Serialize(instance, stream);
+                var value = serializer.Deserialize<TestContract>(stream);
+
+                Assert.Equal(instance.Active, value.Active);
+                Assert.Equal(instance.Bytes, value.Bytes);
+                Assert.Equal(instance.Contract.Text, value.Contract.Text);
+                Assert.Equal(instance.Count, value.Count);
+                Assert.Equal(instance.Date, value.Date);
+                Assert.Equal(instance.Number, value.Number);
+                Assert.Equal(instance.Strings, value.Strings);
+                Assert.Equal(instance.TestEnum, value.TestEnum);
+                Assert.Equal(instance.Text, value.Text);
             }
             sw.Stop();
 

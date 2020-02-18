@@ -51,7 +51,6 @@ namespace NanoSerializer.Mappers
 
                         stream.Write(length);
 
-                        innerStream.Position = 0;
                         innerStream.CopyTo(stream);
                     }
                 }

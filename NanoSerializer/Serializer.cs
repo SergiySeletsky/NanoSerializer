@@ -118,8 +118,10 @@ namespace NanoSerializer
         /// <returns>Byte array</returns>
         public void Serialize(object instance, Stream stream)
         {
+            var initialPosition = stream.Position;
             var source = runtime[instance.GetType()];
             source.Setters.ForEach(setter => setter(instance, stream));
+            stream.Position = initialPosition;
         }
 
         /// <summary>
@@ -146,12 +148,23 @@ namespace NanoSerializer
         /// <returns>New instance of deserialized contract</returns>
         public T Deserialize<T>(byte[] data) where T : new()
         {
-            var instance = new T();
-
             using (var stream = new MemoryStream(data))
             {
-                Deserialize(instance, typeof(T), stream);
+                return Deserialize<T>(stream);
             }
+        }
+
+        /// <summary>
+        /// Deserialize type from byte array
+        /// </summary>
+        /// <typeparam name="T">Serialization type</typeparam>
+        /// <param name="data">Byte array</param>
+        /// <returns>New instance of deserialized contract</returns>
+        public T Deserialize<T>(Stream stream) where T : new()
+        {
+            var instance = new T();
+
+            Deserialize(instance, typeof(T), stream);
 
             return instance;
         }
