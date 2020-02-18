@@ -26,8 +26,8 @@ namespace NanoSerializer.Mappers
         {
             return (src, stream) => {
                 var item = getter(src);
-                ReadOnlySpan<byte> bytes = BitConverter.GetBytes((long)item);
-                stream.Write(bytes);
+                ReadOnlySpan<byte> span = BitConverter.GetBytes((long)item);
+                stream.Write(span);
             };
         }
     }

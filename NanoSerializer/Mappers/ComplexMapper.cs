@@ -41,18 +41,18 @@ namespace NanoSerializer.Mappers
             return (src, stream) => {
                 var item = getter(src);
 
-                using (var ms = new MemoryStream())
+                using (var innerStream = new MemoryStream())
                 {
                     if (item != null)
                     {
-                        serializer.Serialize(item, ms);
+                        serializer.Serialize(item, innerStream);
 
-                        ReadOnlySpan<byte> length = BitConverter.GetBytes((ushort)ms.Length);
+                        ReadOnlySpan<byte> length = BitConverter.GetBytes((ushort)innerStream.Length);
 
                         stream.Write(length);
 
-                        ms.Position = 0;
-                        ms.CopyTo(stream);
+                        innerStream.Position = 0;
+                        innerStream.CopyTo(stream);
                     }
                 }
             };

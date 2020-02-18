@@ -35,16 +35,16 @@ namespace NanoSerializer.Mappers
 
                 var list = (List<string>)item;
 
-                Span<byte> bytes = new byte[0];
+                Span<byte> span = new byte[0];
                 if (list.Any())
                 {
                     var text = list.Aggregate((i, j) => i + "|" + j);
-                    bytes = Encoding.UTF8.GetBytes(text);
+                    span = Encoding.UTF8.GetBytes(text);
                 }
-                ReadOnlySpan<byte> length = BitConverter.GetBytes((ushort)bytes.Length);
+                ReadOnlySpan<byte> length = BitConverter.GetBytes((ushort)span.Length);
 
                 stream.Write(length);
-                stream.Write(bytes);
+                stream.Write(span);
             };
         }
     }

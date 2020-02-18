@@ -28,8 +28,8 @@ namespace NanoSerializer.Mappers
             return (src, stream) => {
                 var item = getter(src);
                 var dateTime = (DateTime)item;
-                ReadOnlySpan<byte> bytes = BitConverter.GetBytes(dateTime.Ticks);
-                stream.Write(bytes);
+                ReadOnlySpan<byte> span = BitConverter.GetBytes(dateTime.Ticks);
+                stream.Write(span);
             };
         }
     }

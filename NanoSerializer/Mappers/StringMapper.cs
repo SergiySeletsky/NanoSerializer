@@ -18,11 +18,11 @@ namespace NanoSerializer.Mappers
             {
                 var length = stream.ReadLength();
 
-                Span<byte> data = stackalloc byte[length];
+                Span<byte> span = stackalloc byte[length];
 
-                stream.Read(data);
+                stream.Read(span);
 
-                var text = Encoding.UTF8.GetString(data);
+                var text = Encoding.UTF8.GetString(span);
 
                 setter(item, text);
             };
@@ -33,11 +33,11 @@ namespace NanoSerializer.Mappers
             return (src, stream) => {
                 var item = getter(src);
                 var text = (string)item;
-                ReadOnlySpan<byte> bytes = Encoding.UTF8.GetBytes(text);
-                ReadOnlySpan<byte> length = BitConverter.GetBytes((ushort)bytes.Length);
+                ReadOnlySpan<byte> span = Encoding.UTF8.GetBytes(text);
+                ReadOnlySpan<byte> length = BitConverter.GetBytes((ushort)span.Length);
 
                 stream.Write(length);
-                stream.Write(bytes);
+                stream.Write(span);
             };
         }
     }
