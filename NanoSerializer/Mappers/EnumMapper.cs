@@ -12,10 +12,11 @@ namespace NanoSerializer.Mappers
             return type.BaseType == typeof(Enum);
         }
 
-        public override void Set(object obj, Stream stream)
+        public override void Set(ref NanoReader reader)
         {
-            var value = (byte)stream.ReadByte();
-            Setter(obj, value);
+            var value = reader.Read(sizeof(byte))[0];
+
+            Setter(reader.Instance, value);
         }
 
         public override void Get(object obj, Stream stream)

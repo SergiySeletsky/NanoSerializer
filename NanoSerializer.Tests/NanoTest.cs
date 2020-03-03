@@ -50,7 +50,7 @@ namespace NanoSerializer.Tests
         [Fact]
         public void TestNanoDeserialize()
         {
-            byte[] data = serializer.Serialize(instance);
+            var data = serializer.Serialize(instance).AsSpan();
 
             Trace.WriteLine($"NANO Size: {data.Length} bytes.");
 
@@ -73,7 +73,8 @@ namespace NanoSerializer.Tests
                 using (var stream = new MemoryStream())
                 {
                     serializer.Serialize(instance, stream);
-                    var value = serializer.Deserialize<TestContract>(stream);
+                    stream.Position = 0;
+                    var value = serializer.Deserialize<TestContract>(stream.ToArray().AsSpan());
                 }
             });
             sw.Stop();
@@ -88,7 +89,8 @@ namespace NanoSerializer.Tests
             using (var stream = new MemoryStream())
             {
                 serializer.Serialize(instance, stream);
-                var value = serializer.Deserialize<TestContract>(stream);
+                stream.Position = 0;
+                var value = serializer.Deserialize<TestContract>(stream.ToArray().AsSpan());
 
                 Assert.Equal(instance.Active, value.Active);
                 Assert.Equal(instance.Bytes, value.Bytes);

@@ -123,7 +123,12 @@ namespace NanoSerializer
         {
             var initialPosition = stream.Position;
             var source = runtime[instance.GetType()];
-            source.ForEach(x => x.Get(instance, stream));
+
+            foreach(var mapper in source)
+            {
+                mapper.Get(instance, stream);
+            }
+
             stream.Position = initialPosition;
         }
 
@@ -151,45 +156,28 @@ namespace NanoSerializer
         /// <returns>New instance of deserialized contract</returns>
         public T Deserialize<T>(ReadOnlySpan<byte> data) where T : new()
         {
-            using (var stream = new MemoryStream(data.ToArray()))
-            {
-                return Deserialize<T>(stream);
-            }
-        }
-
-        /// <summary>
-        /// Deserialize type from byte array
-        /// </summary>
-        /// <typeparam name="T">Serialization type</typeparam>
-        /// <param name="data">Byte array</param>
-        /// <returns>New instance of deserialized contract</returns>
-        public T Deserialize<T>(byte[] data) where T : new()
-        {
-            using (var stream = new MemoryStream(data))
-            {
-                return Deserialize<T>(stream);
-            }
-        }
-
-        /// <summary>
-        /// Deserialize type from byte array
-        /// </summary>
-        /// <typeparam name="T">Serialization type</typeparam>
-        /// <param name="data">Byte array</param>
-        /// <returns>New instance of deserialized contract</returns>
-        public T Deserialize<T>(Stream stream) where T : new()
-        {
             var instance = new T();
 
-            Deserialize(instance, stream);
+            Deserialize(instance, data);
 
             return instance;
         }
 
-        internal void Deserialize(object instance, Stream stream)
+        internal void Deserialize(object instance, ReadOnlySpan<byte> data)
         {
             var source = runtime[instance.GetType()];
-            source.ForEach(x => x.Set(instance, stream));
+
+            var reader = new NanoReader
+            {
+                Instance = instance,
+                Buffer = data,
+                Position = 0
+            };
+
+            foreach (var mapper in source)
+            {
+                mapper.Set(ref reader);
+            }
         }
     }
 }

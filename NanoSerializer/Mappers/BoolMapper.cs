@@ -11,14 +11,13 @@ namespace NanoSerializer.Mappers
             return type == typeof(bool);
         }
 
-        public override void Set(object obj, Stream stream)
+        public override void Set(ref NanoReader reader)
         {
-            Span<byte> span = stackalloc byte[sizeof(bool)];
-            stream.Read(span);
+            var span = reader.Read(sizeof(bool));
 
             var boolean = BitConverter.ToBoolean(span);
 
-            Setter(obj, boolean);
+            Setter(reader.Instance, boolean);
         }
 
         public override void Get(object obj, Stream stream)

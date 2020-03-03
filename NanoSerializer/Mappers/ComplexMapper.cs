@@ -19,20 +19,22 @@ namespace NanoSerializer.Mappers
             return !type.IsPrimitive && type.IsClass && !type.Namespace.StartsWith("System");
         }
 
-        public override void Set(object obj, Stream stream)
+        public override void Set(ref NanoReader reader)
         {
-            var length = stream.ReadLength();
+            if (reader.Position == reader.Buffer.Length)
+            {
+                return;
+            }
+
+            var length = reader.ReadLength();
 
             if (length != 0)
             {
-                Span<byte> span = stackalloc byte[length];
-                stream.Read(span);
-                using (var innerStream = new MemoryStream(span.ToArray()))
-                {
-                    var instance = Activator.CreateInstance(obj.GetType());
-                    serializer.Deserialize(instance, innerStream);
-                    Setter(obj, instance);
-                }
+                var span = reader.Read(length);
+
+                var innerInstance = Activator.CreateInstance(reader.Instance.GetType());
+                serializer.Deserialize(innerInstance, span);
+                Setter(reader.Instance, innerInstance);
             }
         }
 

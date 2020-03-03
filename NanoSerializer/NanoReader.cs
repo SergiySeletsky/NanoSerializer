@@ -8,6 +8,6 @@ namespace NanoSerializer
 
         public int Position;
 
-        public Span<byte> Data;
+        public ReadOnlySpan<byte> Buffer;
     }
 }

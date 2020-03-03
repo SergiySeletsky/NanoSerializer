@@ -11,20 +11,20 @@ namespace NanoSerializer.Mappers
             return type == typeof(DateTime);
         }
 
-        public override void Set(object obj, Stream stream)
+        public override void Set(ref NanoReader reader)
         {
-            Span<byte> span = new byte[sizeof(long)];
-            stream.Read(span);
+            var span = reader.Read(sizeof(long));
 
             var ticks = BitConverter.ToInt64(span);
 
-            Setter(obj, new DateTime(ticks));
+            Setter(reader.Instance, new DateTime(ticks));
         }
 
         public override void Get(object obj, Stream stream)
         {
             var prop = (DateTime)Getter(obj);
             ReadOnlySpan<byte> span = BitConverter.GetBytes(prop.Ticks);
+
             stream.Write(span);
         }
     }

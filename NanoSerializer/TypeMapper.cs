@@ -20,6 +20,6 @@ namespace NanoSerializer
 
         public abstract void Get(object obj, Stream stream);
 
-        public abstract void Set(object obj, Stream stream);
+        public abstract void Set(ref NanoReader reader);
     }
 }

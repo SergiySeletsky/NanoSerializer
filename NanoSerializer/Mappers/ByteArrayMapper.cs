@@ -11,15 +11,13 @@ namespace NanoSerializer.Mappers
             return type == typeof(byte[]);
         }
 
-        public override void Set(object obj, Stream stream)
+        public override void Set(ref NanoReader reader)
         {
-            var length = stream.ReadLength();
+            var length = reader.ReadLength();
 
-            Span<byte> span = stackalloc byte[length];
+            var span = reader.Read(length);
 
-            stream.Read(span);
-
-            Setter(obj, span.ToArray());
+            Setter(reader.Instance, span.ToArray());
         }
 
         public override void Get(object obj, Stream stream)
