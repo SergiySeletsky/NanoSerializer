@@ -11,29 +11,25 @@ namespace NanoSerializer.Mappers
             return type == typeof(byte[]);
         }
 
-        public override Action<object, Stream> Get(Action<object, object> setter)
+        public override void Set(object obj, Stream stream)
         {
-            return (obj, stream) => {
-                var length = stream.ReadLength();
+            var length = stream.ReadLength();
 
-                Span<byte> span = stackalloc byte[length];
+            Span<byte> span = stackalloc byte[length];
 
-                stream.Read(span);
+            stream.Read(span);
 
-                setter(obj, span.ToArray());
-            };
+            Setter(obj, span.ToArray());
         }
 
-        public override Action<object, Stream> Set(Func<object, object> getter)
+        public override void Get(object obj, Stream stream)
         {
-            return (obj, stream) => {
-                ReadOnlySpan<byte> span = (byte[])getter(obj);
+            ReadOnlySpan<byte> span = (byte[])Getter(obj);
 
-                ReadOnlySpan<byte> length = BitConverter.GetBytes((ushort)span.Length);
+            ReadOnlySpan<byte> length = BitConverter.GetBytes((ushort)span.Length);
 
-                stream.Write(length);
-                stream.Write(span);
-            };
+            stream.Write(length);
+            stream.Write(span);
         }
     }
 }

@@ -19,45 +19,40 @@ namespace NanoSerializer.Mappers
             return !type.IsPrimitive && type.IsClass && !type.Namespace.StartsWith("System");
         }
 
-        public override Action<object, Stream> Get(Action<object, object> setter)
+        public override void Set(object obj, Stream stream)
         {
-            return (obj, stream) => {
+            var length = stream.ReadLength();
 
-                var length = stream.ReadLength();
-
-                if (length != 0)
+            if (length != 0)
+            {
+                Span<byte> span = stackalloc byte[length];
+                stream.Read(span);
+                using (var innerStream = new MemoryStream(span.ToArray()))
                 {
-                    Span<byte> span = stackalloc byte[length];
-                    stream.Read(span);
-                    using (var innerStream = new MemoryStream(span.ToArray()))
-                    {
-                        var instance = Activator.CreateInstance(obj.GetType());
-                        serializer.Deserialize(instance, innerStream);
-                        setter(obj, instance);
-                    }
+                    var instance = Activator.CreateInstance(obj.GetType());
+                    serializer.Deserialize(instance, innerStream);
+                    Setter(obj, instance);
                 }
-            };
+            }
         }
 
-        public override Action<object, Stream> Set(Func<object, object> getter)
+        public override void Get(object obj, Stream stream)
         {
-            return (obj, stream) => {
-                var prop = getter(obj);
+            var prop = Getter(obj);
 
-                if (prop != null)
+            if (prop != null)
+            {
+                using (var innerStream = new MemoryStream())
                 {
-                    using (var innerStream = new MemoryStream())
-                    {
-                        serializer.Serialize(prop, innerStream);
+                    serializer.Serialize(prop, innerStream);
 
-                        ReadOnlySpan<byte> length = BitConverter.GetBytes((ushort)innerStream.Length);
+                    ReadOnlySpan<byte> length = BitConverter.GetBytes((ushort)innerStream.Length);
 
-                        stream.Write(length);
+                    stream.Write(length);
 
-                        innerStream.CopyTo(stream);
-                    }
+                    innerStream.CopyTo(stream);
                 }
-            };
+            }
         }
     }
 }

@@ -26,7 +26,7 @@ namespace NanoSerializer
             new LongMapper(),
             new StringMapper()
         };
-        private readonly Dictionary<Type, Mapper> runtime = new Dictionary<Type, Mapper>();
+        private readonly Dictionary<Type, List<TypeMapper>> runtime = new Dictionary<Type, List<TypeMapper>>();
 
         /// <summary>
         /// Register your custom type mapper
@@ -78,7 +78,7 @@ namespace NanoSerializer
         /// </summary>
         private void Register(Type type)
         {
-            var builder = new Mapper();
+            var builder = new List<TypeMapper>();
 
             var properties = type.GetRuntimeProperties()
                 .Where(f => f.GetCustomAttribute<DataMemberAttribute>() != null)
@@ -86,8 +86,11 @@ namespace NanoSerializer
 
             foreach (var property in properties)
             {
-                foreach (var mapper in mappers)
+                foreach (var mapperExisting in mappers)
                 {
+                    // Refactor it
+                    var mapper = (TypeMapper)Activator.CreateInstance(mapperExisting.GetType());
+
                     if (mapper is ComplexMapper)
                     {
                         (mapper as ComplexMapper).Use(this);
@@ -95,12 +98,12 @@ namespace NanoSerializer
                     if (mapper.Can(property.PropertyType))
                     {
                         var setter = BuildSetAccessor(property.SetMethod);
-                        var getMapper = mapper.Get(setter);
-                        builder.Getters.Add(getMapper);
 
                         var getter = BuildGetAccessor(property.GetMethod);
-                        var setMapper = mapper.Set(getter);
-                        builder.Setters.Add(setMapper);
+
+                        mapper.Init(getter, setter);
+                        
+                        builder.Add(mapper);
                         break;
                     }
                 }
@@ -120,7 +123,7 @@ namespace NanoSerializer
         {
             var initialPosition = stream.Position;
             var source = runtime[instance.GetType()];
-            source.Setters.ForEach(setter => setter(instance, stream));
+            source.ForEach(x => x.Get(instance, stream));
             stream.Position = initialPosition;
         }
 
@@ -186,7 +189,7 @@ namespace NanoSerializer
         internal void Deserialize(object instance, Stream stream)
         {
             var source = runtime[instance.GetType()];
-            source.Getters.ForEach(getter => getter(instance, stream));
+            source.ForEach(x => x.Set(instance, stream));
         }
     }
 }

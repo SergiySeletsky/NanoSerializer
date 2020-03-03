@@ -13,37 +13,33 @@ namespace NanoSerializer.Mappers
             return type == typeof(List<string>);
         }
 
-        public override Action<object, Stream> Get(Action<object, object> setter)
+        public override void Set(object obj, Stream stream)
         {
-            return (obj, stream) => {
-                var length = stream.ReadLength();
+            var length = stream.ReadLength();
 
-                Span<byte> span = stackalloc byte[length];
+            Span<byte> span = stackalloc byte[length];
 
-                stream.Read(span);
+            stream.Read(span);
 
-                var list = Encoding.UTF8.GetString(span).Split('|').ToList();
+            var list = Encoding.UTF8.GetString(span).Split('|').ToList();
 
-                setter(obj, list);
-            };
+            Setter(obj, list);
         }
 
-        public override Action<object, Stream> Set(Func<object, object> getter)
+        public override void Get(object obj, Stream stream)
         {
-            return (obj, stream) => {
-                var prop = (List<string>)getter(obj);
+            var prop = (List<string>)Getter(obj);
 
-                Span<byte> span = new byte[0];
-                if (prop.Any())
-                {
-                    var text = prop.Aggregate((i, j) => i + "|" + j);
-                    span = Encoding.UTF8.GetBytes(text);
-                }
-                ReadOnlySpan<byte> length = BitConverter.GetBytes((ushort)span.Length);
+            Span<byte> span = new byte[0];
+            if (prop.Any())
+            {
+                var text = prop.Aggregate((i, j) => i + "|" + j);
+                span = Encoding.UTF8.GetBytes(text);
+            }
+            ReadOnlySpan<byte> length = BitConverter.GetBytes((ushort)span.Length);
 
-                stream.Write(length);
-                stream.Write(span);
-            };
+            stream.Write(length);
+            stream.Write(span);
         }
     }
 }

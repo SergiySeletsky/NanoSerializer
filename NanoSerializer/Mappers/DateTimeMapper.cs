@@ -11,25 +11,21 @@ namespace NanoSerializer.Mappers
             return type == typeof(DateTime);
         }
 
-        public override Action<object, Stream> Get(Action<object, object> setter)
+        public override void Set(object obj, Stream stream)
         {
-            return (obj, stream) => {
-                Span<byte> span = new byte[sizeof(long)];
-                stream.Read(span);
+            Span<byte> span = new byte[sizeof(long)];
+            stream.Read(span);
 
-                var ticks = BitConverter.ToInt64(span);
+            var ticks = BitConverter.ToInt64(span);
 
-                setter(obj, new DateTime(ticks));
-            };
+            Setter(obj, new DateTime(ticks));
         }
 
-        public override Action<object, Stream> Set(Func<object, object> getter)
+        public override void Get(object obj, Stream stream)
         {
-            return (obj, stream) => {
-                var prop = (DateTime)getter(obj);
-                ReadOnlySpan<byte> span = BitConverter.GetBytes(prop.Ticks);
-                stream.Write(span);
-            };
+            var prop = (DateTime)Getter(obj);
+            ReadOnlySpan<byte> span = BitConverter.GetBytes(prop.Ticks);
+            stream.Write(span);
         }
     }
 }
