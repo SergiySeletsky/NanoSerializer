@@ -24,5 +24,21 @@ namespace NanoSerializer
             reader.Position += size;
             return span;
         }
+
+        internal static byte[] ToBytes(this ReadOnlySpan<char> chars)
+        {
+            var bytesCount = Encoding.UTF8.GetByteCount(chars);
+            Span<byte> span = stackalloc byte[bytesCount];
+            Encoding.UTF8.GetBytes(chars, span);
+            return span.ToArray();
+        }
+
+        internal static string ToText(this ReadOnlySpan<byte> span)
+        {
+            var charsCount = Encoding.UTF8.GetCharCount(span);
+            Span<char> chars = stackalloc char[charsCount];
+            Encoding.UTF8.GetChars(span, chars);
+            return new string(chars);
+        }
     }
 }

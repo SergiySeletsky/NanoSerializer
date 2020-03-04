@@ -18,16 +18,17 @@ namespace NanoSerializer.Mappers
 
             var span = reader.Read(length);
 
-            var text = Encoding.UTF8.GetString(span);
+            var text = span.ToText();
 
             Setter(reader.Instance, text);
         }
 
         public override void Get(object obj, Stream stream)
         {
-            var prop = (string)Getter(obj);
+            ReadOnlySpan<char> chars = (string)Getter(obj);
 
-            ReadOnlySpan<byte> span = Encoding.UTF8.GetBytes(prop);
+            Span<byte> span = chars.ToBytes();
+
             ReadOnlySpan<byte> length = BitConverter.GetBytes((ushort)span.Length);
 
             stream.Write(length);
