@@ -27,7 +27,7 @@ namespace NanoSerializer.Mappers
         {
             ReadOnlySpan<char> chars = (string)Getter(obj);
 
-            Span<byte> span = chars.ToBytes();
+            ReadOnlySpan<byte> span = chars.ToBytes();
 
             ReadOnlySpan<byte> length = BitConverter.GetBytes((ushort)span.Length);
 
