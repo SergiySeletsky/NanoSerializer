@@ -1,5 +1,5 @@
 # NanoSerializer
-NanoSerializer is super fast and compact binary data contract serializer
+NanoSerializer is super fast and compact binary data contract serializer for .NET Standard 2.1
 
 ## Performance to de/serialize 100 000 objects:
 * NanoSerializer	370 ms
